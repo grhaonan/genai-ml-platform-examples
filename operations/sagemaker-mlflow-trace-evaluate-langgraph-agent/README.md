@@ -7,6 +7,7 @@ This post explores how to effectively trace and evaluate LangChain LangGraph LLM
 - Implementing tracing for LangGraph agents using MLflow
 - Evaluating LangGraph agent performance with MLflow LLM evaluation metrics
 - Leveraging Amazon SageMaker features for operationalizing agents (AgentOps)
+- MLFlow Prompt registry a powerful tool that streamlines prompt engineering and management in your Generative AI (GenAI) applications. It enables you to version, track, and reuse prompts across your organization, helping maintain consistency and improving collaboration in prompt development (MLFlow Prompt registry is supported in MLFlow version 2.22 or higher.)
 
 ### Code Contains:
 The blog includes practical code snippets demonstrating:
@@ -26,13 +27,14 @@ The blog includes practical code snippets demonstrating:
 ## Prerequisites
 - AWS Account 
 - SageMakerAI Studio - [AWS Setup instructions](https://docs.aws.amazon.com/sagemaker/latest/dg/onboard-quick-start.html)
-- SageMaker MLFlow tracking server - [AWS Setup instructions](https://docs.aws.amazon.com/sagemaker/latest/dg/mlflow-create-tracking-server.html)
+- SageMaker MLFlow tracking server - [AWS Setup instructions](https://docs.aws.amazon.com/sagemaker/latest/dg/mlflow-create-tracking-server.html) . Note: For MLFlow Prompt Registry you will need MLFlow version that support advanced GenAI features.
 - Access to Bedrock LLM model
 
 ## Getting started
 1. Change directory into the root folder to find `run.py`
 2. Install and activate your python virtual environment `virtualenv venv && . venv/bin/activate`
-3. Intall the python packages `pip install -r pyproject.toml`
+3. Intall the python packages `pip install --upgrade pip` and 
+`pip install -r requirements.txt`
 4. Create environmental file `.env`. (Or you can also rename example in file `.env_sample`)
 5. Set all the variable in the `.env` file. See example in file `.env_sample`
 
