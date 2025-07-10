@@ -1,0 +1,62 @@
+{
+    "url": [
+        "https://d18rn0p25nwr6d.cloudfront.net/CIK-0001018724/e42c2068-bad5-4ab6-ae57-36ff8b2aeffd.pdf",
+        "https://d18rn0p25nwr6d.cloudfront.net/CIK-0001018724/c7c14359-36fa-40c3-b3ca-5bf7f3fa0b96.pdf",
+        "https://d18rn0p25nwr6d.cloudfront.net/CIK-0001018724/d2fde7ee-05f7-419d-9ce8-186de4c96e25.pdf",
+        "https://s2.q4cdn.com/299287126/files/doc_financials/2025/ar/2024-Shareholder-Letter-Final.pdf",
+        "https://s2.q4cdn.com/299287126/files/doc_financials/2024/ar/Amazon-com-Inc-2023-Shareholder-Letter.pdf",
+        "https://s2.q4cdn.com/299287126/files/doc_financials/2023/ar/2022-Shareholder-Letter.pdf",
+        "https://s2.q4cdn.com/299287126/files/doc_financials/2025/ar/Amazon-2024-Annual-Report.pdf",
+        "https://s2.q4cdn.com/299287126/files/doc_financials/2024/ar/Amazon-com-Inc-2023-Annual-Report.pdf",
+        "https://s2.q4cdn.com/299287126/files/doc_financials/2023/ar/Amazon-2022-Annual-Report.pdf"
+    ],
+    "document": [
+        "Amazon-10k-2025.pdf", 
+        "Amazon-10k-2024.pdf", 
+        "Amazon-10k-2023.pdf",
+        "Shareholder-Letter-2024.pdf", 
+        "Shareholder-Letter-2023.pdf", 
+        "Shareholder-Letter-2022.pdf", 
+        "Amazon-2024-Annual-Report.pdf", 
+        "Amazon-2023-Annual-Report.pdf", 
+        "Amazon-2022-Annual-Report.pdf"
+     ],
+    "metadata": [
+        {
+            "domain": "Amazon Financial Report",
+            "year": 2025
+        },
+        {
+            "domain": "Amazon Financial Report",
+            "year": 2024
+        },
+        {
+            "domain": "Amazon Financial Report",
+            "year": 2023
+        },
+        {
+            "domain": "Amazon Shareholder Letter",
+            "year": 2024
+        },
+        {
+            "domain": "Amazon Shareholder Letter",
+            "year": 2023
+        },
+        {
+            "domain": "Amazon Shareholder Letter",
+            "year": 2022
+        },
+        {
+            "domain": "Amazon Annual Report",
+            "year": 2024
+        },
+        {
+            "domain": "Amazon Annual Report",
+            "year": 2023
+        },
+        {
+            "domain": "Amazon Annual Report",
+            "year": 2022
+        }
+    ]
+}
