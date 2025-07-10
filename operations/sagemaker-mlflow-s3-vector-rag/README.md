@@ -27,9 +27,9 @@ The blog includes practical code snippets demonstrating:
 - An AWS account with billing enabled.
 - A SageMaker AI Studio domain. For more information, refer to Use quick setup for Amazon SageMaker AI.
 - Access to a running SageMaker AI managed MLflow tracking server in Amazon SageMaker Studio. For more information, refer to the instructions for setting up a new MLflow tracking server.
-- Enable access to an Amazon Bedrock foundation model (FM) to use in LLM-as-a-judge. In this sample, we use Anthropic’s Claude 3 Sonnet.
+- Enable access to an Amazon Bedrock foundation model to use in LLM-as-a-judge. In this sample, we use Anthropic’s Claude 3 Sonnet.
 
-## Executio
+## Execution
 
 The code is self contained in the `experiment-tracking-with-mlflow.ipynb` file.
 
