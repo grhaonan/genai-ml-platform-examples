@@ -28,13 +28,13 @@ The blog includes practical code snippets demonstrating:
 - AWS Account 
 - SageMakerAI Studio - [AWS Setup instructions](https://docs.aws.amazon.com/sagemaker/latest/dg/onboard-quick-start.html)
 - SageMaker MLFlow tracking server - [AWS Setup instructions](https://docs.aws.amazon.com/sagemaker/latest/dg/mlflow-create-tracking-server.html) . Note: For MLFlow Prompt Registry you will need MLFlow version that support advanced GenAI features.
-- Access to Bedrock LLM model
+- Access to Bedrock LLM model. This code was tested with bedrock model with inference profile `us.anthropic.claude-3-5-haiku-20241022-v1:0`.
+- Python >= 3.13
+- [uv](https://docs.astral.sh/uv/) - Fast Python package installer and resolver (Preferred)
 
 ## Getting started
 1. Change directory into the root folder to find `run.py`
-2. Install and activate your python virtual environment `virtualenv venv && . venv/bin/activate`
-3. Intall the python packages `pip install --upgrade pip` and 
-`pip install -r requirements.txt`
+2. Run the uv commands `uv venv` and `uv pip sync pyproject.toml`. See the next section if you want to use pip instead of uv
 4. Create environmental file `.env`. (Or you can also rename example in file `.env_sample`)
 5. Set all the variable in the `.env` file. See example in file `.env_sample`
 
@@ -47,8 +47,14 @@ The blog includes practical code snippets demonstrating:
         AWS_REGION = '<ENTER-YOUR-REGION>' 
         ```
 5. Activate your AWS credentials
+6. Execute command `uv run run.py` for running the agent and the MLFlow evaluation with tracing.
 
-## Execution
+### Steps to get started with pip instead of uv
+1. Install and activate your python virtual environment `virtualenv venv && . venv/bin/activate`
+2. Intall the python packages `pip install --upgrade pip` and 
+`pip install -r requirements.txt`
+
+### Execution for pip 
  - ```python run.py``` For running the agent and the MLFlow evaluation with tracing.
  - Use the notebook for running the agent evaluation using RAGAS and tracking with MLFlow.
 

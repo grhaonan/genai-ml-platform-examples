@@ -19,6 +19,7 @@ _GROUNDTRUTH_FILEMANE = f'file://{os.getcwd()}/golden_questions_answer.jsonl'
 load_dotenv()
 _MLFLOW_URI = os.getenv('MLFLOW_URI_SMAI')
 _MLFLOW_EXPERIMENT_NAME = os.getenv('MLFLOW_EXPERIMENT_ID')
+_MLFLOW_LOGMODEL_ID = os.getenv('MLFLOW_LOGMODEL_ID')
 _REGION = os.getenv('AWS_REGION')
 
 mlflow.set_tracking_uri(_MLFLOW_URI)
@@ -131,10 +132,12 @@ def run_evaluation_mlflow(agent_file="graph.py", _REGISTER_AGENT_FLAG=True):
                                                                             _GROUNDTRUTH_FILEMANE)
         print(mlflow_eval_results.metrics.items())
         mlflow.log_artifact("graph_diagram.png")
+        mlflow.log_param("domain", 'RegulatedFinance')
+        mlflow.log_param("BU", 'Trading and Investment Banking')
         if _REGISTER_AGENT_FLAG:
             model_info = mlflow.langchain.log_model(
             lc_model=agent_file, # Path to our model Python file
-            artifact_path="langgraph",
+            artifact_path=_MLFLOW_LOGMODEL_ID,
             )
             print("Agent registered successfully", model_info.model_uri)
     return mlflow_eval_results

@@ -14,6 +14,7 @@ import os
 from botocore.client import Config
 import boto3
 import mlflow
+from mlflow.entities import SpanType
 
 from tools import get_stock_price_data
 
@@ -34,6 +35,17 @@ bedrock_config = Config(
 kwargs: dict = {'temperature': 0.0,
                 'top_k': 0,
                 'max_tokens': 4096}
+
+# Set MLFlow prompt registry and prompt version
+# PROMPT_REGISTRY_ID = os.getenv('PROMPT_REGISTRY_ID')
+# #PROMPT_OBJECT = mlflow.load_prompt(f"prompts:/{PROMPT_REGISTRY_ID}/2")
+# # User "Production" approved prompt alias
+# PROMPT_OBJECT_PRODUCTION = mlflow.load_prompt(f"prompts:/{PROMPT_REGISTRY_ID}@Production")
+# APP_ASSISTANT_PROMPT = PROMPT_OBJECT_PRODUCTION.template
+
+# To import prompt locally
+from mlflow_prompts import SYSTEM_PROMPT_1
+APP_ASSISTANT_PROMPT = SYSTEM_PROMPT_1
 
 bedrock_runtime_client = boto3.client('bedrock-runtime', 
                                       config=bedrock_config, 
@@ -56,7 +68,7 @@ class GraphState(TypedDict):
 
 # Define the function that determines whether to continue or not
 # Instrument the mlflow trace to export metrics from the langgraph node
-@mlflow.trace(name="should_continue", attributes={"workflow": "agent_should_continue"}, span_type="graph.py")
+@mlflow.trace(name="should_continue", attributes={"workflow": "agent_should_continue"}, span_type=SpanType.AGENT)
 def should_continue(state: GraphState):
     messages = state["messages"]
     last_message = messages[-1]
@@ -66,13 +78,10 @@ def should_continue(state: GraphState):
 
 # LangGraph Node 
 # Instrument the mlflow trace to export metrics from the langgraph node
-@mlflow.trace(name="assistant", attributes={"workflow": "agent_assistant"}, span_type="graph.py")
+@mlflow.trace(name="assistant", attributes={"workflow": "agent_assistant"}, span_type=SpanType.AGENT)
 def assistant(state: GraphState):
-    system_prompt = """You are an AI assistant specialized in finance and stock market topics. 
-    Your primary focus is to provide accurate and helpful information related to financial markets, 
-    stocks, investments, and economic trends. Please limit your responses to these areas of expertise. 
-    If asked about topics outside of finance and the stock market, politely redirect the conversation 
-    to your area of specialization."""
+    # Consume prompt in the agent
+    system_prompt = APP_ASSISTANT_PROMPT
     
     messages = [HumanMessage(content=system_prompt)] + state["messages"]
     response = llm_with_tools.invoke(messages)
@@ -81,7 +90,7 @@ def assistant(state: GraphState):
 # Node
 tool_node = ToolNode(TOOLS)
 
-@mlflow.trace(name="build_workflow", attributes={"workflow": "agent_build_workflow"}, span_type="graph.py")
+@mlflow.trace(name="build_workflow", attributes={"workflow": "agent_build_workflow"}, span_type=SpanType.CHAIN)
 def build_workflow() -> StateGraph:
     # Define a new graph for the agent
     builder = StateGraph(GraphState)
@@ -92,7 +101,7 @@ def build_workflow() -> StateGraph:
     builder.add_edge("tools", "assistant")
     return builder
 
-@mlflow.trace(name="build_app", attributes={"workflow": "agent_build_app"}, span_type="graph.py")
+@mlflow.trace(name="build_app", attributes={"workflow": "agent_build_app"}, span_type=SpanType.AGENT)
 def build_app():
     """Build and compile the workflow."""
     workflow = build_workflow()
