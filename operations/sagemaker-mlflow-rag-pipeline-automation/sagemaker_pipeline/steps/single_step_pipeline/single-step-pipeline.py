@@ -51,6 +51,10 @@ def parse_args():
     parser.add_argument("--role-arn", type=str, required=True)
     parser.add_argument("--model-dimensions", type=int, required=True)
     parser.add_argument("--llm-evaluator", type=str, default= "bedrock:/anthropic.claude-3-haiku-20240307-v1:0")
+    parser.add_argument("--github-repository", type=str)
+    parser.add_argument("--github-action-name", type=str)
+    parser.add_argument("--github-workflow-id", type=str)
+    parser.add_argument("--sagemaker-pipeline-name", type=str)
     return parser.parse_args()
 
 
@@ -754,7 +758,7 @@ def main():
     # Set up MLflow tracking
     mlflow.set_tracking_uri(args.mlflow_tracking_uri)
     experiment_suffix = strftime('%d', gmtime())
-    experiment_name = f"{experiment_suffix}-{args.experiment_name}"
+    experiment_name = f"single-{experiment_suffix}-{args.experiment_name}"
     experiment = mlflow.set_experiment(experiment_name=experiment_name)
     experiment_id = experiment.experiment_id
     
@@ -787,7 +791,12 @@ def main():
         main_run_id = main_run.info.run_id
         print("mlflow_run", main_run_id)
         mlflow.log_param("pipeline_start_time", datetime.now().isoformat())
-        
+        mlflow.log_param("github_repository", args.github_repository)
+        mlflow.log_param("github_action_name", args.github_action_name)
+        mlflow.log_param("github_workflow_id", args.github_workflow_id)
+        mlflow.log_param("sagemaker_pipeline_name", args.sagemaker_pipeline_name)
+        mlflow.log_param("pipeline_type", "single")
+
         try:
             # Execute pipeline steps
             source_dataset = data_preparation()

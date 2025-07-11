@@ -95,6 +95,16 @@ def main():  # pragma: no cover
         execution = pipeline.start(parameters=parameters)
         logger.info(f"\n###### Execution started with PipelineExecutionArn: {execution.arn}")
 
+
+        # # Extract execution ID from ARN
+        # execution_id = execution.arn.split("/")[-1]
+        
+        # # Add execution ID to parameters if not already present
+        # if parameters is None:
+        #     parameters = {}
+        # parameters["SageMakerPipelineExecutionId"] = execution_id
+
+
         # Wait for execution to complete if requested
         if not args.no_wait:
             logger.info("Waiting for the execution to finish...")

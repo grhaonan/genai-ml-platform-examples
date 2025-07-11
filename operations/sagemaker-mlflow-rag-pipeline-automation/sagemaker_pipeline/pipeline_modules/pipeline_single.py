@@ -34,7 +34,10 @@ def get_pipeline(
     role=None,
     default_bucket=None,
     pipeline_name="rag-single-step-pipeline",
-    base_job_prefix="rag-single"
+    base_job_prefix="rag-single",
+    github_repo=None,
+    github_action=None,
+    github_workflow_id=None
 ):
     region = os.environ.get("AWS_REGION", "us-west-2")
     sagemaker_session = get_session(region, default_bucket)
@@ -132,6 +135,20 @@ def get_pipeline(
         default_value="bedrock:/anthropic.claude-3-haiku-20240307-v1:0"
     )
 
+    github_repository = ParameterString(
+        name="GitHubRepository",
+        default_value=github_repo
+    )
+
+    github_action_name = ParameterString(
+        name="GitHubActionName",
+        default_value = github_action
+    )
+    
+    github_workflow_id = ParameterString(
+        name="GitHubWorkflowId",
+        default_value = github_workflow_id
+    )
         
     # Output S3 location
     output_s3_uri = f"s3://{default_bucket}/rag-pipeline/output/{timestamp}/"
@@ -178,7 +195,11 @@ def get_pipeline(
             "--model-dimensions", model_dimensions,
             "--output-data-path", "/opt/ml/processing/output",
             "--role-arn", role,
-            "--llm-evaluator", llm_evaluator
+            "--llm-evaluator", llm_evaluator,
+            "--github-repository", github_repository,
+            "--github-action-name", github_action_name,
+            "--github-workflow-id", github_workflow_id,
+            "--sagemaker-pipeline-name", pipeline_name
         ],
         logs=True   
     )
@@ -206,7 +227,10 @@ def get_pipeline(
             mlflow_tracking_uri,
             instance_type,
             instance_count,
-            llm_evaluator
+            llm_evaluator,
+            github_repository,
+            github_action_name,
+            github_workflow_id,
         ],
         steps=[processing_step],
         sagemaker_session=pipeline_session
