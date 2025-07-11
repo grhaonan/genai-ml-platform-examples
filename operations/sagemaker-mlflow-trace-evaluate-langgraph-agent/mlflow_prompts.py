@@ -2,11 +2,13 @@ import mlflow
 from dotenv import load_dotenv
 import os
 
+# mlflow.genai.register_prompt available in mlflow>=3.1
 load_dotenv()
+# Set the AWS SageMaker MLFlow ARN
 _MLFLOW_URI = os.getenv('MLFLOW_URI_SMAI')
-
 mlflow.set_tracking_uri(_MLFLOW_URI)
 
+# Set the SageMaker MLFlow prompt ID
 PROMPT_NAME = os.getenv('PROMPT_REGISTRY_ID')
 # Initial prompt
 
@@ -42,19 +44,16 @@ def mlflow_register_prompt(prompt_name:str,
                            commit_message:str=None
                            ):
     # Register a new prompt
-    prompt = mlflow.register_prompt(
+    prompt = mlflow.genai.register_prompt(
         name=prompt_name,
         template=source_template,
         # Optional: Provide a description for the prompt
         commit_message=commit_message,
-        # Optional: Specify any additional metadata about the prompt version
-        version_metadata={
-            "author": "sandeep@promptengineer.com",
-        },
         # Optional: Set tags applies to the prompt (across versions)
         tags={
             "task": "question-and-answering",
             "language": "en",
+            "BU": "Digital-marketing"
         },
     )
 
@@ -64,26 +63,16 @@ def mlflow_register_prompt(prompt_name:str,
 
 def mlflow_add_alias(prompt_name:str, version:int, alias:str):
     print(f"Adding alias {alias} to prompt {prompt_name} version {version}")
-    prompt = mlflow.set_prompt_alias(prompt_name, alias, version)
+    prompt = mlflow.genai.set_prompt_alias(prompt_name, alias, version)
     return prompt
-
-def mlflow_get_prompt(prompt_name:str, version:int):
-    print(f"Getting prompt {prompt_name} version {version}")
-    prompt = mlflow.get_prompt(prompt_name, version)
-    return prompt
-
-def mlflow_remove_prompt(prompt_name:str, version:int):
-    print(f"Removing prompt {prompt_name} version {version}")
-    mlflow.delete_prompt(prompt_name, version)
-    return
 
 if __name__ == "__main__":
     response = mlflow_register_prompt(PROMPT_NAME, 
                                       INITIAL_SYSTEM_PROMPT,
                                       "First prompt"
                                       )
-    # Load the prompt by name and version
-    loaded_prompt_v1 = mlflow.load_prompt(f"prompts:/{PROMPT_NAME}/1")
+    #Load the prompt by name and version
+    loaded_prompt_v1 = mlflow.genai.load_prompt(f"prompts:/{PROMPT_NAME}/1")
     print(loaded_prompt_v1.template)
 
     response = mlflow_register_prompt(PROMPT_NAME, 
@@ -91,7 +80,7 @@ if __name__ == "__main__":
                                       "Fine-tune response topic adherence"
                                       )
     # Load the prompt by name and version
-    loaded_prompt_v2 = mlflow.load_prompt(f"prompts:/{PROMPT_NAME}/2")
+    loaded_prompt_v2 = mlflow.genai.load_prompt(f"prompts:/{PROMPT_NAME}/2")
     print(loaded_prompt_v2.template)
 
     # Create prompt alias
@@ -100,7 +89,6 @@ if __name__ == "__main__":
     
     # Load the prompt by alias (use "@" to specify the alias)
     prompt = mlflow.load_prompt(f"prompts:/{PROMPT_NAME}@Production")
-    # To use the prompt in the LangGraph agent, you can update the graph.py to use the MLFlow prompt 
     print(prompt.template)
 
     # Update with new llama_prompt_template
