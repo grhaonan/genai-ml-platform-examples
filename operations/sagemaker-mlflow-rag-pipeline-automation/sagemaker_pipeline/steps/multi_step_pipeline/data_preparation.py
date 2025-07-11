@@ -6,6 +6,7 @@ from collections import Counter
 import matplotlib.pyplot as plt
 from datasets import load_dataset
 from datetime import datetime
+from time import gmtime, strftime
 import json
 
 def parse_args():
@@ -14,10 +15,15 @@ def parse_args():
     parser.add_argument("--experiment-name", type=str, required=True)
     parser.add_argument("--mlflow-tracking-uri", type=str, required=True)
     parser.add_argument("--parent-run-name", type=str, required=True)
+    parser.add_argument("--github-repository", type=str)
+    parser.add_argument("--github-action-name", type=str)
+    parser.add_argument("--github-workflow-id", type=str)
+    parser.add_argument("--sagemaker-pipeline-name", type=str)
 
     return parser.parse_args()
 
-def data_preparation(output_path, parent_run_name):
+def data_preparation(output_path, parent_run_name, github_repository, github_action_name, github_workflow_id,
+                     sagemaker_pipeline_name):
 
     with mlflow.start_run(run_name=parent_run_name) as parent_run:
         parent_run_id = parent_run.info.run_id
@@ -32,6 +38,11 @@ def data_preparation(output_path, parent_run_name):
         # Log basic parameters in parent run
         mlflow.log_param("pipeline_start_time", datetime.now().isoformat())
         mlflow.log_param("pipeline_status", "started")
+        mlflow.log_param("github_repository", github_repository)
+        mlflow.log_param("github_action_name", github_action_name)
+        mlflow.log_param("github_workflow_id", github_workflow_id)
+        mlflow.log_param("sagemaker_pipeline_name", sagemaker_pipeline_name)
+        mlflow.log_param("pipeline_type", "multi")
 
         #Start the Data preparation step
         with mlflow.start_run(run_name="DataPreparation", nested=True):
@@ -109,13 +120,25 @@ def data_preparation(output_path, parent_run_name):
 
 def main():
     args = parse_args()
+
+    env_vars = dict(sorted(os.environ.items()))
     
+    # Print each variable
+    for key, value in env_vars.items():
+        # Truncate very long values for readability
+        print(f"{key}: {value}")
+    
+    experiment_suffix = strftime('%d', gmtime())
+
     # Set up MLflow tracking
     mlflow.set_tracking_uri(args.mlflow_tracking_uri)
-    mlflow.set_experiment(experiment_name=args.experiment_name)
+    
+    mlflow.set_experiment(experiment_name=f"multi-{experiment_suffix}-{args.experiment_name}")
     
     # Run data preparation
-    data_preparation(args.output_data_path, args.parent_run_name)
+    data_preparation(args.output_data_path, args.parent_run_name,
+                     args.github_repository, args.github_action_name,
+                     args.github_workflow_id, args.sagemaker_pipeline_name)
 
 
 if __name__ == "__main__":

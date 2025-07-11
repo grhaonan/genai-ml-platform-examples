@@ -1,0 +1,137 @@
+name: SageMaker RAG Pipeline Build
+run-name: ${{ github.actor }} is building RAG Pipeline 🚀
+
+on:
+  workflow_dispatch:
+    inputs:
+      pipeline_type:
+        description: 'Pipeline type to run'
+        required: true
+        default: 'single'
+        type: choice
+        options:
+          - single
+          - multi
+      parameters:
+        description: 'JSON string of pipeline parameters to override'
+        required: false
+        default: '{}'
+      wait_for_completion:
+        description: 'Wait for pipeline execution to complete'
+        required: false
+        default: 'true'
+        type: boolean
+      logLevel:
+        description: 'Log level'
+        required: true
+        default: 'warning'
+        type: choice
+        options:
+          - info
+          - warning
+          - debug
+  push:
+    branches: [ main ]
+    paths:
+      - 'sagemaker_pipeline/**'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'sagemaker_pipeline/**'
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  GitHub-Actions-RAG-Pipeline-Build:
+    runs-on: ubuntu-latest
+
+    env:
+      AWS_REGION: ${{ vars.AWS_REGION }}
+      MLFLOW_URI: ${{ vars.MLFLOW_URI }}
+      EMBEDDING_ENDPOINT_NAME: ${{ vars.EMBEDDING_ENDPOINT_NAME }}
+      TEXT_ENDPOINT_NAME: ${{ vars.TEXT_ENDPOINT_NAME}}
+      DOMAIN_NAME: ${{ vars.DOMAIN_NAME }}
+      PROCESSING_INSTANCE_TYPE: ${{ vars.PROCESSING_INSTANCE_TYPE }}
+      PROCESSING_INSTANCE_COUNT: ${{ vars.PROCESSING_INSTANCE_COUNT }}
+
+
+    steps:
+    - run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event."
+    - run: echo "🖥️ This job is now running on a ${{ runner.os }} server hosted by GitHub!"
+    - run: echo "🔎 The name of your branch is ${{ github.ref }} and your repository is ${{ github.repository }}."
+
+    - name: Check out repository code
+      uses: actions/checkout@v4
+      
+    - name: Set up Python 3.11
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.11"
+        
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+          role-to-assume: ${{secrets.PIPELINE_EXECUTION_IAM_ROLE}}
+          aws-region: ${{vars.AWS_REGION}}
+          
+    - name: Install pip dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r ./sagemaker_pipeline/requirements.txt
+    - name: List files in the repository
+      run: |
+        ls ${{ github.workspace }}
+        
+    - name: Determine pipeline module
+      id: pipeline-module
+      run: |
+        if [ "${{ github.event.inputs.pipeline_type || 'multi' }}" == "single" ]; then
+          echo "module=pipeline_modules.pipeline_single" >> $GITHUB_OUTPUT
+          echo "Selected single-step RAG pipeline"
+        else
+          echo "module=pipeline_modules.pipeline_multi" >> $GITHUB_OUTPUT
+          echo "Selected multi-step RAG pipeline"
+        fi
+        
+    - name: Prepare no-wait flag
+      id: wait-flag
+      run: |
+        if [ "${{ github.event.inputs.wait_for_completion || 'true' }}" == "false" ]; then
+          echo "flag=--no-wait" >> $GITHUB_OUTPUT
+        else
+          echo "flag=" >> $GITHUB_OUTPUT
+        fi
+        
+    - name: Run SageMaker Pipeline
+      id: run-pipeline
+      run: |
+        export PYTHONUNBUFFERED=TRUE
+        
+        # Set default parameters if none provided
+        PARAMS="${{ github.event.inputs.parameters || '{}' }}"
+        
+        # Run the pipeline
+        python ./sagemaker_pipeline/run_pipeline.py \
+          -n ${{ steps.pipeline-module.outputs.module }} \
+          -role-arn ${{secrets.SAGEMAKER_PIPELINE_ROLE_ARN}} \
+          -p "$PARAMS" \
+          -tags '[{"Key":"PipelineType", "Value":"${{ github.event.inputs.pipeline_type || 'multi' }}"}]' \
+          -kwargs '{"role": "${{secrets.SAGEMAKER_PIPELINE_ROLE_ARN}}","default_bucket":"${{secrets.ARTIFACT_BUCKET}}","pipeline_name":"rag-${{ github.event.inputs.pipeline_type || 'multi' }}-${{ github.run_id }}","github_repo":"${{ github.repository }}","github_action":"${{ github.workflow }}","github_workflow_id":"${{ github.run_id }}"}' \
+          ${{ steps.wait-flag.outputs.flag }}
+        
+    - name: Output Pipeline Execution Details
+      run: |
+        echo "Pipeline Type: ${{ github.event.inputs.pipeline_type || 'multi' }}"
+        echo "Execution ARN: ${{ steps.run-pipeline.outputs.execution_arn }}"
+        echo "Parameters: ${{ github.event.inputs.parameters || '{}' }}"
+        
+        if [ "${{ github.event.inputs.wait_for_completion || 'true' }}" == "true" ]; then
+          echo "🌟 Success: Pipeline execution completed."
+        else
+          echo "🌟 Success: Pipeline execution started but not waiting for completion."
+          echo "Check the AWS SageMaker console for execution status."
+        fi
+        
+    - run: echo "💯 This github action job's status is ${{ job.status }}."

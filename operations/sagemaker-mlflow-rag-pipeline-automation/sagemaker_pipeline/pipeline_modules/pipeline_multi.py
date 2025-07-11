@@ -35,7 +35,10 @@ def get_pipeline(
     role=None,
     default_bucket=None,
     pipeline_name="rag-multi-step-pipeline",
-    base_job_prefix="rag-multi"
+    base_job_prefix="rag-multi",
+    github_repo=None,
+    github_action=None,
+    github_workflow_id=None
 ):
 
     region = os.environ.get("AWS_REGION", "us-west-2")
@@ -140,6 +143,21 @@ def get_pipeline(
     )
 
 
+    github_repository = ParameterString(
+        name="GitHubRepository",
+        default_value=github_repo
+    )
+
+    github_action_name = ParameterString(
+        name="GitHubActionName",
+        default_value = github_action
+    )
+    
+    github_workflow_id = ParameterString(
+        name="GitHubWorkflowId",
+        default_value = github_workflow_id
+    )
+
     # Output S3 location
     experiment_name = f"rag-pipeline-{timestamp}"
     
@@ -180,7 +198,11 @@ def get_pipeline(
             "--experiment-name", experiment_name,
             "--mlflow-tracking-uri", mlflow_tracking_uri,
             "--output-data-path", "/opt/ml/processing/output",
-            "--parent-run-name", parent_run_name
+            "--parent-run-name", parent_run_name,
+            "--github-repository", github_repository,
+            "--github-action-name", github_action_name,
+            "--github-workflow-id", github_workflow_id,
+            "--sagemaker-pipeline-name", pipeline_name
         ]
     )
 
@@ -353,7 +375,10 @@ def get_pipeline(
             instance_type,
             instance_count,
             parent_run_name,
-            llm_evaluator
+            llm_evaluator,
+            github_repository,
+            github_action_name,
+            github_workflow_id,
         ],
         steps=[
             data_prep_step, 
