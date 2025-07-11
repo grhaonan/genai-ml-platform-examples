@@ -7,7 +7,7 @@ This post explores how to effectively trace and evaluate LangChain LangGraph LLM
 - Implementing tracing for LangGraph agents using MLflow
 - Evaluating LangGraph agent performance with MLflow LLM evaluation metrics
 - Leveraging Amazon SageMaker features for operationalizing agents (AgentOps)
-- MLFlow Prompt registry a powerful tool that streamlines prompt engineering and management in your Generative AI (GenAI) applications. It enables you to version, track, and reuse prompts across your organization, helping maintain consistency and improving collaboration in prompt development (MLFlow Prompt registry is supported in MLFlow version 2.22 or higher.)
+- MLFlow Prompt registry a powerful tool that streamlines prompt engineering and management in your Generative AI (GenAI) applications. It enables you to version, track, and reuse prompts across your organization, helping maintain consistency and improving collaboration in prompt development (MLFlow Prompt registry is supported in MLFlow server versions 2.22 or higher.)
 
 ### Code Contains:
 The blog includes practical code snippets demonstrating:
@@ -31,6 +31,7 @@ The blog includes practical code snippets demonstrating:
 - Access to Bedrock LLM model. This code was tested with bedrock model with inference profile `us.anthropic.claude-3-5-haiku-20241022-v1:0`.
 - Python >= 3.13
 - [uv](https://docs.astral.sh/uv/) - Fast Python package installer and resolver (Preferred)
+- Optional: mlflow.genai.register_prompt available in pip versions `mlflow>=3.1`
 
 ## Getting started
 1. Change directory into the root folder to find `run.py`
