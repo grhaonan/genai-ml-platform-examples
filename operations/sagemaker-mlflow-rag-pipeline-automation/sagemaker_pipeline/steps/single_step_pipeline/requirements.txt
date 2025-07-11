@@ -1,0 +1,11 @@
+datasets
+opensearch-py
+mlflow==2.22.1
+sagemaker-mlflow
+langchain
+langgraph
+langchain-core
+sagemaker
+requests-aws4auth
+pyarrow
+
