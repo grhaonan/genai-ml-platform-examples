@@ -36,7 +36,7 @@ kwargs: dict = {'temperature': 0.0,
                 'top_k': 0,
                 'max_tokens': 4096}
 
-# Set MLFlow prompt registry and prompt version
+# Set MLFlow prompt registry and prompt version. Uncomment below to import prompt from remote registry
 # PROMPT_REGISTRY_ID = os.getenv('PROMPT_REGISTRY_ID')
 # #PROMPT_OBJECT = mlflow.load_prompt(f"prompts:/{PROMPT_REGISTRY_ID}/2")
 # # User "Production" approved prompt alias
