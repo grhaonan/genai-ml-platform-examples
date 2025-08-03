@@ -9,7 +9,7 @@ The AWS GenAI/ML Platform is a collection of tools and examples that enables you
 - Governance: Samples for implementing governance and compliance best practices.
 - Infrastructure: Configuration templates for provisioning the necessary AWS resources.
 - Integration: Demonstrations of integrating opensource frameworks with AWS services.
-- Operations: Guidance on model lifecycle management.
+- Operations: Guidance on GenAI lifecycle management.
 
 ### Getting Started
 To get started, follow these steps:
