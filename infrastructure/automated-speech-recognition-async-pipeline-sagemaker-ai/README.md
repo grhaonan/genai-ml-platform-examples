@@ -183,6 +183,9 @@ This project follows AWS best practices for CDK development:
 - **Comprehensive Testing**: Unit and integration tests for both infrastructure and Lambda code
 - **Security First**: IAM roles follow principle of least privilege
 
+## Data source
+The audio files under the data folder was collected from the internet. The test audio file used for Asynch endpoint was too big for file upload so please replace with your own test file. The 'test_2speakers_16k.wav' was from the [kaggle dataset here](https://www.kaggle.com/datasets/wiradkp/mini-speech-diarization).
+
 ## License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
