@@ -1,0 +1,8 @@
+boto3
+requests
+datasets
+soundfile
+tqdm
+torch
+torchcodec
+librosa
