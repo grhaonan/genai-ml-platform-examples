@@ -184,7 +184,7 @@ This project follows AWS best practices for CDK development:
 - **Security First**: IAM roles follow principle of least privilege
 
 ## Data source
-The audio files under the data folder was collected from the internet. The test audio file used for Asynch endpoint was too big for file upload so please replace with your own test file. The 'test_2speakers_16k.wav' was from the [kaggle dataset here](https://www.kaggle.com/datasets/wiradkp/mini-speech-diarization).
+The audio files under the data folder was collected from the internet. The test audio file used for Asynch endpoint was too big for file upload so please replace with your own test file. The 'medical_diarization.wav' was from [here](https://aws-ml-blog.s3.amazonaws.com/artifacts/transcribe_audio_processing/medical-diarization.wav).
 
 ## License
 
