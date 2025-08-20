@@ -1,5 +1,6 @@
 import argparse
 import os
+import shutil
 import mlflow
 import boto3
 import json
@@ -348,8 +349,17 @@ def rag_retrieval(input_path, output_path, opensearch_client, embedding_model_pr
             with open(os.path.join(output_path, "graph_config.json"), "w") as f:
                 json.dump(graph_config, f)
             
-            # Copy the original dataset for next step
-            os.system(f"cp -r {input_path}/original_dataset {output_path}/")
+            # Copy the original dataset for next steps
+            # os.system(f"cp -r {input_path}/original_dataset {output_path}/")
+            # Validate paths first
+            if not os.path.exists(input_path):
+                raise ValueError(f"Input path does not exist: {input_path}")
+
+            # Perform the copy operation safely
+            shutil.copytree(
+                os.path.join(input_path, "original_dataset"),
+                os.path.join(output_path, "original_dataset")
+            )
             
             print(f"Retrieval results saved to {output_path}")
             return query_examples
