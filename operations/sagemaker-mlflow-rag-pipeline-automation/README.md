@@ -171,3 +171,8 @@ Common issues and solutions:
 ## License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
+
+
+---
+
+*This solution demonstrates modern automation architecture patterns for AI/ML workloads on AWS, showcasing how to build scalable AgenticRAG pipelines.*

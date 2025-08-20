@@ -1,5 +1,6 @@
 import argparse
 import os
+import shutil
 import mlflow
 import boto3
 import pickle
@@ -209,7 +210,16 @@ def data_ingestion(input_path, output_path, opensearch_client, embedding_model_p
                 json.dump(result, f)
             
             # Copy the original dataset for next steps
-            os.system(f"cp -r {input_path}/original_dataset {output_path}/")
+            # os.system(f"cp -r {input_path}/original_dataset {output_path}/")
+            # Validate paths first
+            if not os.path.exists(input_path):
+                raise ValueError(f"Input path does not exist: {input_path}")
+
+            # Perform the copy operation safely
+            shutil.copytree(
+                os.path.join(input_path, "original_dataset"),
+                os.path.join(output_path, "original_dataset")
+            )
             
             print(f"Ingestion results saved to {output_path}")
             return index_name
