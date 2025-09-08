@@ -15,7 +15,7 @@ ENV NIM_HOST=127.0.0.1
 ENV NIM_HTTP_PORT=9000
 ENV RIVA_GRPC_PORT=50051
 # Proven working model settings (offline mode). Diarization optional via gRPC only
-ENV NIM_TAGS_SELECTOR=name=parakeet-1-1b-ctc-en-us,mode=ofl
+ENV NIM_TAGS_SELECTOR=name=parakeet-1-1b-ctc-en-us,mode=ofl,vad=silero,diarizer=sortformer
 
 # System deps and Python packages
 RUN apt-get update && apt-get install -y \
