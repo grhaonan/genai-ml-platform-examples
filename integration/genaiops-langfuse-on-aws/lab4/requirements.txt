@@ -4,6 +4,6 @@ boto3>=1.28.0
 python-dotenv>=1.0.0
 mcp>=0.1.0
 awslabs-aws-documentation-mcp-server>=0.1.4
-langfuse>=2.45.0
+langfuse==2.60.9
 opentelemetry-exporter-otlp>=1.22.0
 uv
