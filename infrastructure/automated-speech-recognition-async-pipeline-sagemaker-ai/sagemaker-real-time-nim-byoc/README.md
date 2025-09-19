@@ -35,7 +35,7 @@ aws ecr get-login-password --region ${REGION} | docker login --username AWS --pa
 docker push ${ECR}/nim-sagemaker-asr:latest
 ```
 
-## Deploy (ml.g5.48xlarge)
+## Deploy (ml.g5.2xlarge)
 ```bash
 # Get existing role from current deployment or use your role ARN
 ROLE_ARN=$(aws sagemaker describe-model --model-name nim-asr-combined-model --region us-east-1 --query 'ExecutionRoleArn' --output text 2>/dev/null || echo "arn:aws:iam::<ACCOUNT_ID>:role/service-role/AmazonSageMaker-ExecutionRole-XXXXXXXXXXXX")
@@ -54,7 +54,7 @@ aws sagemaker create-model \
 aws sagemaker create-endpoint-config \
   --region ${REGION} \
   --endpoint-config-name nim-asr-combined-config-${TIMESTAMP} \
-  --production-variants VariantName=primary,ModelName=nim-asr-combined-model-${TIMESTAMP},InitialInstanceCount=1,InstanceType=ml.g5.48xlarge,ContainerStartupHealthCheckTimeoutInSeconds=2400,ModelDataDownloadTimeoutInSeconds=2400
+  --production-variants VariantName=primary,ModelName=nim-asr-combined-model-${TIMESTAMP},InitialInstanceCount=1,InstanceType=ml.g5.2xlarge,ContainerStartupHealthCheckTimeoutInSeconds=2400,ModelDataDownloadTimeoutInSeconds=2400
 
 # Create or update endpoint
 aws sagemaker create-endpoint \
