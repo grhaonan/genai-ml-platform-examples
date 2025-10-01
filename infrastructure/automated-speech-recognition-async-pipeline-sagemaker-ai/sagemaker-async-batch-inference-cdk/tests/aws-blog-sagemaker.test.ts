@@ -56,7 +56,10 @@ describe('AwsBlogSagemakerStack', () => {
 
         // THEN
         expect(stack.dynamoDbTable).toBeDefined();
-        expect(stack.lambdaFunction).toBeDefined();
-        expect(stack.lambdaRole).toBeDefined();
+        expect(stack.s3ProcessorFunction).toBeDefined();
+        expect(stack.snsStatusUpdaterFunction).toBeDefined();
+        expect(stack.s3ProcessorRole).toBeDefined();
+        expect(stack.snsUpdaterRole).toBeDefined();
+        expect(stack.snsStatusTopic).toBeDefined();
     });
 });

@@ -1,9 +1,30 @@
 #!/bin/bash
 
+# Function to display usage
+usage() {
+    echo "Usage: $0 <LAMBDA_ARN> <S3_BUCKET_URI> [AWS_PROFILE]"
+    echo ""
+    echo "Arguments:"
+    echo "  LAMBDA_ARN       Lambda function ARN"
+    echo "  S3_BUCKET_URI    S3 bucket URI (e.g., s3://my-bucket/path/)"
+    echo "  AWS_PROFILE      AWS profile to use (optional, defaults to 'default')"
+    echo ""
+    echo "Example:"
+    echo "  $0 arn:aws:lambda:us-west-2:123456789012:function:MyFunction s3://my-audio-bucket/uploads/"
+    echo "  $0 arn:aws:lambda:us-west-2:123456789012:function:MyFunction s3://my-audio-bucket/uploads/ my-profile"
+    exit 1
+}
+
+# Check if required arguments are provided
+if [ $# -lt 2 ]; then
+    echo "Error: LAMBDA_ARN and S3_BUCKET_URI are required"
+    usage
+fi
+
 # Configuration
-LAMBDA_ARN="arn:aws:lambda:us-west-2:774077853304:function:AwsBlogSagemakerStack-s3sagemakerprocessor"
-S3_BUCKET="${S3_BUCKET:-s3://sagemaker-us-west-2-774077853304/parakeet-asr/single-file-folder/}"
-AWS_PROFILE="${AWS_PROFILE:-default}"
+LAMBDA_ARN="$1"
+S3_BUCKET="$2"
+AWS_PROFILE="${3:-default}"
 CLOUDFRONT_URL="https://d1r3o5mtjsxzvl.cloudfront.net/sample_000000.wav"
 LAMBDA_INPUT="{\"bucket_uri\": \"$S3_BUCKET\"}"
 
@@ -135,9 +156,38 @@ cleanup() {
     fi
 }
 
+# Validate Lambda ARN format
+validate_lambda_arn() {
+    if [[ ! "$LAMBDA_ARN" =~ ^arn:aws:lambda:[a-z0-9-]+:[0-9]+:function:[a-zA-Z0-9-_]+$ ]]; then
+        print_error "Invalid Lambda ARN format: $LAMBDA_ARN"
+        print_error "Expected format: arn:aws:lambda:region:account-id:function:function-name"
+        exit 1
+    fi
+    print_status "Lambda ARN validated: $LAMBDA_ARN"
+}
+
+# Validate S3 bucket URI format
+validate_s3_uri() {
+    if [[ ! "$S3_BUCKET" =~ ^s3://[a-zA-Z0-9._-]+(/.*)?$ ]]; then
+        print_error "Invalid S3 bucket URI format: $S3_BUCKET"
+        print_error "Expected format: s3://bucket-name/path/"
+        exit 1
+    fi
+    print_status "S3 bucket URI validated: $S3_BUCKET"
+}
+
 # Main execution
 main() {
     print_status "Starting download, upload, and Lambda invocation process..."
+    print_status "Using Lambda ARN: $LAMBDA_ARN"
+    print_status "Using S3 bucket: $S3_BUCKET"
+    print_status "Using AWS profile: $AWS_PROFILE"
+    
+    # Validate Lambda ARN
+    validate_lambda_arn
+    
+    # Validate S3 URI
+    validate_s3_uri
     
     # Check dependencies
     check_dependencies

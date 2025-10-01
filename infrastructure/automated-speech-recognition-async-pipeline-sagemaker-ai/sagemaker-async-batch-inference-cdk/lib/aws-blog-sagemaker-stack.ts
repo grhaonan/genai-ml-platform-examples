@@ -4,6 +4,7 @@ import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
 import * as iam from 'aws-cdk-lib/aws-iam';
 import * as sns from 'aws-cdk-lib/aws-sns';
 import * as snsSubscriptions from 'aws-cdk-lib/aws-sns-subscriptions';
+import { NagSuppressions } from 'cdk-nag';
 
 import { Construct } from 'constructs';
 import {
@@ -28,7 +29,7 @@ export class AwsBlogSagemakerStack extends cdk.Stack {
     const lambdaConfig: LambdaFunctionConfig = {
       timeoutMinutes: 15,
       memorySize: 512,
-      runtime: 'python3.9',
+      runtime: 'python3.13',
       logLevel: 'INFO',
       codePath: 'lambda/s3-sagemaker-processor',
       ...props?.lambdaConfig
@@ -36,7 +37,7 @@ export class AwsBlogSagemakerStack extends cdk.Stack {
 
     const dynamoConfig: DynamoDbConfig = {
       billingMode: 'ON_DEMAND',
-      pointInTimeRecovery: false,
+      pointInTimeRecovery: true,
       enableInferenceIdIndex: true,
       ...props?.dynamoDbConfig
     };
@@ -56,11 +57,9 @@ export class AwsBlogSagemakerStack extends cdk.Stack {
       billingMode: dynamoConfig.billingMode === 'ON_DEMAND'
         ? dynamodb.BillingMode.PAY_PER_REQUEST
         : dynamodb.BillingMode.PROVISIONED,
-      ...(dynamoConfig.pointInTimeRecovery && {
-        pointInTimeRecoverySpecification: {
-          pointInTimeRecoveryEnabled: true
-        }
-      }),
+      pointInTimeRecoverySpecification: {
+        pointInTimeRecoveryEnabled: dynamoConfig.pointInTimeRecovery || false
+      },
       removalPolicy: cdk.RemovalPolicy.DESTROY, // For development/testing
     });
 
@@ -85,7 +84,7 @@ export class AwsBlogSagemakerStack extends cdk.Stack {
       ]
     });
 
-    // Add S3 permissions - allow listing and reading from all buckets
+    // Add S3 permissions - restrict to SageMaker bucket pattern for improved security
     this.s3ProcessorRole.addToPolicy(new iam.PolicyStatement({
       effect: iam.Effect.ALLOW,
       actions: [
@@ -93,8 +92,8 @@ export class AwsBlogSagemakerStack extends cdk.Stack {
         's3:GetObject'
       ],
       resources: [
-        'arn:aws:s3:::*',
-        'arn:aws:s3:::*/*'
+        `arn:aws:s3:::sagemaker-${this.region}-${this.account}`,
+        `arn:aws:s3:::sagemaker-${this.region}-${this.account}/*`
       ]
     }));
 
@@ -116,12 +115,17 @@ export class AwsBlogSagemakerStack extends cdk.Stack {
 
     // Add SageMaker permissions for async inference
     if (sageMakerConfig.enableSageMakerAccess) {
+      const sageMakerEndpointArn = sageMakerConfig.endpointName 
+        ? `arn:aws:sagemaker:${this.region}:${this.account}:endpoint/${sageMakerConfig.endpointName}`
+        : `arn:aws:sagemaker:${this.region}:${this.account}:endpoint/*`;
+        
       this.s3ProcessorRole.addToPolicy(new iam.PolicyStatement({
         effect: iam.Effect.ALLOW,
         actions: [
-          'sagemaker:*'
+          'sagemaker:InvokeEndpointAsync',
+          'sagemaker:DescribeEndpoint'
         ],
-        resources: ['*'] // Will be restricted to specific endpoint in production
+        resources: [sageMakerEndpointArn]
       }));
     }
 
@@ -142,9 +146,7 @@ export class AwsBlogSagemakerStack extends cdk.Stack {
     );
 
     // Import external SNS topic for failed inference notifications
-    const failedInferenceTopic = sns.Topic.fromTopicArn(
-      this,
-      'FailedInferenceTopic',
+    const failedInferenceTopic = sns.Topic.fromTopicArn(this, 'FailedInferenceTopic',
       `arn:aws:sns:${this.region}:${this.account}:failed-inf`
     );
 
@@ -156,6 +158,38 @@ export class AwsBlogSagemakerStack extends cdk.Stack {
       ],
       resources: [this.snsStatusTopic.topicArn]
     }));
+
+    // Add CDK-nag suppressions for S3 Processor Role
+    NagSuppressions.addResourceSuppressions(
+      this.s3ProcessorRole,
+      [
+        {
+          id: 'AwsSolutions-IAM4',
+          reason: 'AWSLambdaBasicExecutionRole is required for Lambda functions to write logs to CloudWatch',
+          appliesTo: ['Policy::arn:<AWS::Partition>:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole']
+        },
+        {
+          id: 'AwsSolutions-IAM5',
+          reason: 'Lambda needs access to all DynamoDB GSI indexes for querying by inference_id',
+          appliesTo: [`Resource::<FileProcessingStatusTable3F2FBEB5.Arn>/index/*`]
+        },
+        {
+          id: 'AwsSolutions-IAM5',
+          reason: 'S3 object access is restricted to SageMaker bucket pattern for security',
+          appliesTo: [
+            `Resource::arn:aws:s3:::sagemaker-<AWS::Region>-<AWS::AccountId>/*`,
+            `Resource::arn:aws:s3:::sagemaker-${this.region}-${this.account}/*`
+          ]
+        },
+        {
+          id: 'AwsSolutions-IAM5',
+          reason: 'CloudWatch Logs permissions require wildcard for log group creation',
+          appliesTo: ['Resource::*']
+        },
+
+      ],
+      true // Apply to child constructs (DefaultPolicy)
+    );
 
     // Create environment variables for Lambda function
     const environmentVariables = this.createLambdaEnvironmentVariables(
@@ -171,6 +205,8 @@ export class AwsBlogSagemakerStack extends cdk.Stack {
       environmentVariables,
       'Lambda function to process S3 files through SageMaker async inference'
     );
+
+
 
     // Create IAM role for SNS Status Updater Lambda function
     this.snsUpdaterRole = new iam.Role(this, 'SNSStatusUpdaterRole', {
@@ -196,6 +232,7 @@ export class AwsBlogSagemakerStack extends cdk.Stack {
       ]
     }));
 
+    // Add S3 permissions - restrict to SageMaker bucket pattern for improved security
     this.snsUpdaterRole.addToPolicy(new iam.PolicyStatement({
       effect: iam.Effect.ALLOW,
       actions: [
@@ -203,8 +240,8 @@ export class AwsBlogSagemakerStack extends cdk.Stack {
         's3:GetObject'
       ],
       resources: [
-        'arn:aws:s3:::*',
-        'arn:aws:s3:::*/*'
+        `arn:aws:s3:::sagemaker-${this.region}-${this.account}`,
+        `arn:aws:s3:::sagemaker-${this.region}-${this.account}/*`
       ]
     }));
 
@@ -219,6 +256,37 @@ export class AwsBlogSagemakerStack extends cdk.Stack {
         'arn:aws:bedrock:*::foundation-model/*' // Allow access to all foundation models
       ]
     }));
+
+    // Add CDK-nag suppressions for SNS Updater Role
+    NagSuppressions.addResourceSuppressions(
+      this.snsUpdaterRole,
+      [
+        {
+          id: 'AwsSolutions-IAM4',
+          reason: 'AWSLambdaBasicExecutionRole is required for Lambda functions to write logs to CloudWatch',
+          appliesTo: ['Policy::arn:<AWS::Partition>:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole']
+        },
+        {
+          id: 'AwsSolutions-IAM5',
+          reason: 'Lambda needs access to all DynamoDB GSI indexes for querying',
+          appliesTo: [`Resource::<FileProcessingStatusTable3F2FBEB5.Arn>/index/*`]
+        },
+        {
+          id: 'AwsSolutions-IAM5',
+          reason: 'S3 object access is restricted to SageMaker bucket pattern for security',
+          appliesTo: [
+            `Resource::arn:aws:s3:::sagemaker-<AWS::Region>-<AWS::AccountId>/*`,
+            `Resource::arn:aws:s3:::sagemaker-${this.region}-${this.account}/*`
+          ]
+        },
+        {
+          id: 'AwsSolutions-IAM5',
+          reason: 'Bedrock access to foundation models is required for AI processing',
+          appliesTo: ['Resource::arn:aws:bedrock:*::foundation-model/*']
+        }
+      ],
+      true // Apply to child constructs (DefaultPolicy)
+    );
 
     // Create environment variables for SNS Status Updater
     const snsEnvironmentVariables = {
@@ -284,7 +352,7 @@ export class AwsBlogSagemakerStack extends cdk.Stack {
   /**
    * Helper method to create Lambda functions with shared libraries
    */
-  private createLambdaFunction(
+    private createLambdaFunction(
     functionId: string,
     codePath: string,
     role: iam.Role,
@@ -292,7 +360,7 @@ export class AwsBlogSagemakerStack extends cdk.Stack {
     description: string
   ): lambda.Function {
     return new lambda.Function(this, functionId, {
-      runtime: lambda.Runtime.PYTHON_3_9,
+      runtime: lambda.Runtime.PYTHON_3_13,
       handler: 'index.lambda_handler',
       code: lambda.Code.fromAsset('.', {
         exclude: [

@@ -1,0 +1,11 @@
+dist/
+!jest.config.js
+node_modules
+
+# CDK asset staging directory
+.cdk.staging
+cdk.out
+lambda/**/__pycache__/*
+tests/**/__pycache__
+tests/lambda/unit
+.env
