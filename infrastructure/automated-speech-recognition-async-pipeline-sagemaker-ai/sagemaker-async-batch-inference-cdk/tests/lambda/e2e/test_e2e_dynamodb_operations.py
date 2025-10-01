@@ -54,8 +54,10 @@ def delete_all_dynamodb_table_data(table_name: str, region_name: str = 'us-east-
     logger = logging.getLogger(__name__)
     
     try:
-        # Create DynamoDB client
-        dynamodb_client = boto3.client('dynamodb', region_name=region_name)
+        # Create DynamoDB client with genai SSO profile support
+        profile_name = os.environ.get('AWS_PROFILE', 'genai')
+        session = boto3.Session(profile_name=profile_name)
+        dynamodb_client = session.client('dynamodb', region_name=region_name)
         
         logger.info(f"Starting to delete all data from table: {table_name}")
         
@@ -133,7 +135,9 @@ class TestDynamoDBOperationsE2E:
     def account_id(self):
         """Get AWS account ID."""
         try:
-            sts_client = boto3.client('sts')
+            profile_name = os.environ.get('AWS_PROFILE', 'genai')
+            session = boto3.Session(profile_name=profile_name)
+            sts_client = session.client('sts')
             response = sts_client.get_caller_identity()
             return response['Account']
         except Exception:
@@ -142,7 +146,9 @@ class TestDynamoDBOperationsE2E:
     @pytest.fixture(scope="class")
     def dynamodb_client(self, aws_region):
         """Create DynamoDB client for test setup/teardown."""
-        return boto3.client('dynamodb', region_name=aws_region)
+        profile_name = os.environ.get('AWS_PROFILE', 'genai')
+        session = boto3.Session(profile_name=profile_name)
+        return session.client('dynamodb', region_name=aws_region)
     
     @pytest.fixture
     def db_operations(self, aws_region, account_id):

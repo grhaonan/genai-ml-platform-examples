@@ -1,6 +1,12 @@
 #!/usr/bin/env node
 import * as cdk from 'aws-cdk-lib';
 import { AwsBlogSagemakerStack } from '../lib/aws-blog-sagemaker-stack';
+import { AwsSolutionsChecks } from 'cdk-nag';
+import { Aspects } from 'aws-cdk-lib';
+import * as dotenv from 'dotenv';
+
+// Load environment variables from .env file
+dotenv.config();
 
 const app = new cdk.App();
 new AwsBlogSagemakerStack(app, 'AwsBlogSagemakerStack', {
@@ -14,13 +20,19 @@ new AwsBlogSagemakerStack(app, 'AwsBlogSagemakerStack', {
 
   /* Uncomment the next line if you know exactly what Account and Region you
    * want to deploy the stack to. */
-  // env: { account: '123456789012', region: 'us-east-1' },
+  env: {
+    account: process.env.AWS_ACCOUNT_ID,
+    region: process.env.AWS_DEFAULT_REGION
+  },
 
   /* For more information, see https://docs.aws.amazon.com/cdk/latest/guide/environments.html */
-  
+
   // SageMaker configuration
   sageMakerConfig: {
-    endpointName: 'parakeet-async-endpoint-1753856615',
+    endpointName: process.env.SAGEMAKER_ENDPOINT_NAME,
     enableSageMakerAccess: true
   }
 });
+
+// Apply cdk-nag AWS Solutions checks
+Aspects.of(app).add(new AwsSolutionsChecks({ verbose: true }));

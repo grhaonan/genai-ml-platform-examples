@@ -64,19 +64,18 @@ class TestS3OperationsE2E:
         if not cls.test_bucket:
             pytest.skip("TEST_DELETE_S3_BUCKET_FILES environment variable not set. Skipping e2e tests.")
         
-        # Initialize S3Operations instance
-        cls.s3_ops = S3Operations(cls.region_name, cls.account_id)
+        # Create session with genai profile
+        session = boto3.Session(profile_name='genai')
         
-        # Initialize direct S3 client for test setup/teardown
-        cls.s3_client = boto3.client('s3', region_name=cls.region_name)
+        # Initialize S3Operations instance with the session
+        cls.s3_ops = S3Operations(cls.region_name, cls.account_id, session)
+        
+        # Initialize direct S3 client for test setup/teardown using genai profile
+        cls.s3_client = session.client('s3', region_name=cls.region_name)
         
         # Print STS caller identity for debugging
-        sts_client = boto3.client('sts', region_name=cls.region_name)
-        session = boto3.Session(profile_name='genai')
-
-
         try:
-            sts_client = boto3.client('sts', region_name=cls.region_name)
+            sts_client = session.client('sts', region_name=cls.region_name)
             caller_identity = sts_client.get_caller_identity()
             print(f"STS Caller Identity: {caller_identity}")
         except Exception as e:
@@ -359,7 +358,7 @@ class TestS3OperationsE2E:
         self.logger.info(f"Decoded Content: \n {content[0]}")
 
     
-    @pytest.mark.skip(reason="Large batch test - skip for regular test runs")
+    # @pytest.mark.skip(reason="Large batch test - skip for regular test runs")
     def test_delete_all_files_large_batch(self):
         """Test deleting a large number of files (testing batch processing)."""
         # Get bucket name from environment variables
@@ -367,6 +366,7 @@ class TestS3OperationsE2E:
         region_name = os.environ.get('AWS_DEFAULT_REGION', self.region_name)
         test_bucket = f"sagemaker-{region_name}-{account_id}"
         test_folder_prefix = "parakeet-asr/output/"
+
         
         # Verify files exist before deletion
         list_result = self.s3_ops.list_objects(test_bucket, test_folder_prefix)

@@ -16,9 +16,10 @@ from botocore.exceptions import ClientError, NoCredentialsError, BotoCoreError
 class S3Operations:
     """Handles S3 operations including client initialization and object listing."""
     
-    def __init__(self, region_name: str, account_id: str):
+    def __init__(self, region_name: str, account_id: str, session: Optional[boto3.Session] = None):
         self.region_name = region_name
         self.account_id = account_id
+        self.session = session
         self.logger = logging.getLogger(__name__)
         self._client = None
     
@@ -30,7 +31,10 @@ class S3Operations:
             Dict[str, Any]: Result with is_success, client, error_code, and error_message
         """
         try:
-            self._client = boto3.client('s3', region_name=self.region_name)
+            if self.session:
+                self._client = self.session.client('s3', region_name=self.region_name)
+            else:
+                self._client = boto3.client('s3', region_name=self.region_name)
             self.logger.info(f"S3 client initialized successfully for account {self.account_id} in region {self.region_name}")
             return {
                 'is_success': True,

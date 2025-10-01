@@ -14,7 +14,7 @@ class BaseConfigManager:
     """Base configuration manager with common functionality."""
     
     # AWS Configuration constants
-    AWS_ACCOUNT_ID = os.getenv('AWS_ACCOUNT_ID', '774077853304')
+    AWS_ACCOUNT_ID = os.getenv('AWS_ACCOUNT_ID', '')
     AWS_REGION = os.getenv('AWS_DEFAULT_REGION', 'us-west-2')
     
     def __init__(self, service_name: str = None):
