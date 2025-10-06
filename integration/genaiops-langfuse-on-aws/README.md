@@ -10,12 +10,12 @@ Through five progressive labs, you will gain practical experience with GenAI obs
 
 ## Key Technologies
 
-- **Amazon Bedrock**: AWS's fully managed service providing access to foundation models (Nova Pro, Lite, Micro) through a unified API, with knowledge bases, guardrails, and agents
-- **Langfuse**: Open-source LLM engineering platform with 6M+ monthly SDK installations, providing comprehensive observability and monitoring for AI applications
-- **RAGAS**: Evaluation framework for reference-free assessment of RAG pipelines using LLM-based metrics
-- **Strands Agents**: AWS's open-source SDK for building AI agents with a model-driven approach, used in production by Amazon Q Developer
-- **Model Context Protocol (MCP)**: Open standard for connecting AI systems to external data sources and tools
-- **Amazon Bedrock AgentCore**: Enterprise-grade infrastructure for deploying and operating AI agents at scale with security and reliability
+- **Amazon Bedrock**: Fully managed service providing access to foundation models through a unified API, including Nova Pro, Lite, and Micro models, with built-in capabilities for knowledge bases, guardrails, and agents
+- **Langfuse**: Open-source LLM engineering platform providing comprehensive observability, tracing, prompt management, and evaluation capabilities for AI applications
+- **RAGAS**: Evaluation framework for assessing RAG pipelines using LLM-based metrics without requiring manually-annotated ground truth data
+- **Strands Agents**: Open-source SDK for building AI agents with a model-driven approach, allowing developers to define prompts and tools while the LLM handles planning and orchestration
+- **Model Context Protocol (MCP)**: Open standard providing a universal interface for connecting AI systems to external data sources and tools
+- **Amazon Bedrock AgentCore**: Infrastructure for deploying and operating AI agents with serverless runtime, automatic scaling, session isolation, and enterprise security controls
 
 ## Prerequisites
 
