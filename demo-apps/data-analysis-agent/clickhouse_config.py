@@ -6,11 +6,11 @@ Configuration settings for connecting to ClickHouse Cloud instance.
 
 # ClickHouse Cloud Configuration
 CLICKHOUSE_CONFIG = {
-    "host": "",  # Just hostname, no https://
+    "host": "sql-clickhouse.clickhouse.com",  # Just hostname, no https://
     "port": 8443,
-    "user": "default", 
+    "user": "demo", 
     "password": "",
-    "database": "default",
+    #"database": "default",
     "secure": True,  # Use HTTPS/TLS
     "verify": True   # Verify SSL certificates
 }
@@ -21,7 +21,7 @@ MCP_ENV = {
     "CLICKHOUSE_PORT": str(CLICKHOUSE_CONFIG["port"]),
     "CLICKHOUSE_USER": CLICKHOUSE_CONFIG["user"],
     "CLICKHOUSE_PASSWORD": CLICKHOUSE_CONFIG["password"],
-    "CLICKHOUSE_DATABASE": CLICKHOUSE_CONFIG["database"],
+    #"CLICKHOUSE_DATABASE": CLICKHOUSE_CONFIG["database"],
     "CLICKHOUSE_SECURE": "true",  # Enable secure connection
     "CLICKHOUSE_VERIFY": "true"   # Verify SSL certificates
 }

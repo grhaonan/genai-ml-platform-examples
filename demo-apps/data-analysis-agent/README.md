@@ -1,224 +1,165 @@
-# ClickHouse Data Analyst with Strands SDK
+# ClickHouse AgentCore Gateway Setup
 
-A powerful ClickHouse database analyst built with the [Strands SDK](https://strandsagents.com/) that connects to ClickHouse Cloud through the [Model Context Protocol (MCP)](https://github.com/ClickHouse/mcp-clickhouse). Now deployed on [Amazon Bedrock AgentCore](https://docs.aws.amazon.com/bedrock/latest/userguide/agentcore.html) for scalable, serverless execution.
+This guide explains how to set up the AgentCore Gateway for sending ClickHouse analysis summaries to SNS.
 
-## 🌟 Features
-
-- 🔌 **MCP Integration**: Seamless connection to ClickHouse Cloud via MCP server
-- 🤖 **Strands Data Analyst**: Built with official Strands SDK patterns
-- ☁️ **Bedrock AgentCore**: Deployed on AWS for serverless, scalable execution
-- 💬 **Conversational Interface**: Natural language database interactions
-- 🛠️ **Comprehensive Analysis**: Full database analysis capabilities
-- 📊 **Rich Formatting**: Beautiful query result display with insights
-- 🌐 **Web UI**: Interactive web interface for data analysis
-
-## 🏗️ Architecture
+## Architecture
 
 ```
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   Web UI        │    │   Data Analyst  │    │   ClickHouse    │
-│   (FastAPI)     │◄──►│   Agent         │◄──►│   Cloud         │
-│                 │    │ (Bedrock        │    │   (MCP)         │
-│                 │    │  AgentCore)     │    │                 │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│   ClickHouse    │    │   AgentCore     │    │   AgentCore     │    │   Lambda +      │
+│   Analyst       │◄──►│   Runtime       │◄──►│   Gateway       │◄──►│   SNS Topic     │
+│   Agent         │    │   (with Memory) │    │   (OAuth)       │    │                 │
+└─────────────────┘    └─────────────────┘    └─────────────────┘    └─────────────────┘
 ```
 
-## 🚀 Quick Start
+## Components
 
-### 1. Configure ClickHouse Connection
+1. **ClickHouse MCP Server**: Provides database query tools (stdio connection)
+2. **AgentCore Gateway**: Exposes Lambda function as MCP tool (HTTP connection)
+3. **Lambda Function**: Sends analysis summaries to SNS topic
+4. **SNS Topic**: Delivers notifications to subscribers
 
-First, update `clickhouse_config.py` with your ClickHouse Cloud credentials:
+## Deployment Steps
 
-```python
-CLICKHOUSE_CONFIG = {
-    "host": "your-host.clickhouse.cloud",
-    "port": 8443,
-    "user": "default", 
-    "password": "your-password",
-    "database": "default",
-    "secure": True,
-    "verify": True
-}
-```
+### 1. Deploy the Gateway and Lambda
 
-### 2. Deploy to Amazon Bedrock AgentCore
-
-#### Prerequisites
-- AWS CLI configured (`aws configure`)
-- Python 3.10 or newer
-- Amazon Bedrock model access enabled for Claude 3.7 Sonnet
-
-#### Installation & Setup
 ```bash
-# Create virtual environment
-python -m venv .venv
-source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+# Make sure you're in the project directory
+cd /Users/wangaws/Documents/workshop/genai-ml-platform-examples/demo-apps/data-analysis-agent
 
-# Install dependencies
-pip install -r requirements.txt
+# Activate virtual environment
+python3 -m venv .venv
+source .venv/bin/activate 
 
+# Deploy Gateway, Lambda, and SNS topic
+python deploy_clickhouse_gateway.py
 ```
 
-#### Configure and Deploy
+This will:
+- Create an SNS topic for notifications
+- Deploy the Lambda function with SNS permissions
+- Create an AgentCore Gateway with OAuth authentication
+- Save configuration to `clickhouse_gateway_config.json`
+
+### 2. Subscribe to SNS Topic
+
 ```bash
-# Configure the agent for AgentCore deployment
+# Subscribe your email to receive notifications
+aws sns subscribe \
+  --topic-arn $(jq -r '.sns_topic_arn' clickhouse_gateway_config.json) \
+  --protocol email \
+  --notification-endpoint your-email@example.com
+
+# Confirm the subscription via email
+```
+
+### 3. Deploy/Update AgentCore Runtime
+
+```bash
+# Configure the agent (if not already done)
 agentcore configure -e agentcore_clickhouse_analyst.py
 
-# Deploy to AgentCore (creates runtime, memory, and observability)
+# Deploy or update the runtime
 agentcore launch
-
-# Test the deployed agent
-agentcore invoke '{"prompt": "Analyze my ClickHouse database"}'
 ```
 
-#### Monitor Deployment
+The agent will automatically detect the Gateway configuration and include the notification tool.
+
+### 4. Test the Integration
+
 ```bash
-# Check deployment status
-agentcore status
-
-# View logs
-agentcore logs
-
-# Access CloudWatch dashboard for observability
-# URL provided in agentcore status output
+# Test the agent with a query that triggers notification
+agentcore invoke '{
+  "prompt": "Analyze the sales table and send me a summary notification"
+}'
 ```
 
-The web interface will be available at: http://localhost:8001
+## Gateway Configuration
 
-## 📁 Project Structure
+The `clickhouse_gateway_config.json` file contains:
 
-```
-clickhouse-mcp-agent/
-├── clickhouse_config.py         # ClickHouse Cloud configuration
-├── data_analyst_agent.py        # Main data analyst agent
-├── simple_mcp_agent.py          # MCP client helper
-├── analyst_web_server.py        # FastAPI web server
-├── start_analyst_ui.py          # Application startup script
-├── start_mcp_server.py          # MCP server startup script
-├── static/                      # Web UI files
-│   ├── analyst_ui.html          # Main UI template
-│   └── analyst_ui.js            # Frontend JavaScript
-├── requirements.txt             # Python dependencies
-└── README.md                    # This file
-```
-
-## 🛠️ Agent Capabilities
-
-The ClickHouse Data Analyst provides:
-
-### Core Database Operations
-- **Database Analysis** - Comprehensive database overview
-- **Table Exploration** - Detailed table structure and content analysis
-- **Data Quality Assessment** - Completeness, duplicates, anomalies detection
-- **Performance Insights** - Query optimization recommendations
-
-### Advanced Analytics
-- **Statistical Analysis** - Mean, median, quartiles, distributions
-- **Pattern Recognition** - Trend identification and data patterns
-- **Comparative Analysis** - Table and dataset comparisons
-- **Business Insights** - Actionable recommendations
-
-### Natural Language Interface
-- **Conversational Queries** - Ask questions in plain English
-- **Smart Responses** - Context-aware analysis and explanations
-- **Rich Formatting** - Beautiful, structured output with insights
-
-## 💡 Usage Examples
-
-### Web Interface
-1. Access the deployed AgentCore endpoint
-2. View automatic database analysis
-3. Ask questions like "Analyze the sales data table"
-4. Execute custom SQL queries
-5. Compare different tables
-
-### Programmatic Usage
-
-```python
-# Test deployed agent via AgentCore CLI
-agentcore invoke '{"prompt": "What insights can you provide about the sales data?"}'
-
-# Or use AWS SDK to invoke the runtime directly
-import boto3
-client = boto3.client('bedrock-agentcore')
-response = client.invoke_runtime(
-    runtimeId='your-runtime-id',
-    payload='{"prompt": "Analyze my database"}'
-)
-```
-
-## 🔧 Configuration
-
-### ClickHouse Configuration
-
-Update `clickhouse_config.py` with your ClickHouse Cloud credentials:
-
-```python
-CLICKHOUSE_CONFIG = {
-    "host": "your-host.clickhouse.cloud",
-    "port": 8443,
-    "user": "default", 
-    "password": "your-password",
-    "database": "default",
-    "secure": True,
-    "verify": True
+```json
+{
+  "sns_topic_arn": "arn:aws:sns:...",
+  "lambda_function_arn": "arn:aws:lambda:...",
+  "gateway_id": "...",
+  "gateway_url": "https://...",
+  "cognito_user_pool_id": "...",
+  "cognito_client_id": "...",
+  "cognito_client_secret": "...",
+  "discovery_url": "https://...",
+  "access_token": "..."
 }
 ```
 
-### AgentCore Environment Variables
+## Available Tool
 
-The agent automatically uses these environment variables when deployed on AgentCore:
+The Gateway exposes one tool to the agent:
 
-```bash
-BEDROCK_AGENTCORE_MEMORY_ID=auto-configured
-AWS_REGION=your-deployment-region
+### `send_analysis_summary`
+
+Sends a ClickHouse analysis summary to the SNS topic.
+
+**Parameters:**
+- `summary` (required): The analysis summary text
+- `table_name` (optional): Name of the table analyzed
+- `analysis_type` (optional): Type of analysis performed
+
+**Example usage in agent:**
+```python
+# The agent can call this tool automatically
+"After analyzing the data, send a summary notification with the key findings"
 ```
 
+## How It Works
 
-## 🔍 Troubleshooting
+1. **Agent receives query**: User asks for analysis with notification
+2. **ClickHouse analysis**: Agent uses ClickHouse MCP tools to query data
+3. **Generate summary**: Agent creates a summary of findings
+4. **Call Gateway tool**: Agent invokes `send_analysis_summary` via Gateway
+5. **Lambda execution**: Gateway forwards request to Lambda function
+6. **SNS notification**: Lambda publishes message to SNS topic
+7. **Email delivery**: SNS sends email to subscribers
 
-### Common Issues
+## Troubleshooting
 
-1. **Connection Failed**
-   - Verify ClickHouse Cloud credentials in `clickhouse_config.py`
-   - Check network connectivity to ClickHouse Cloud
+### Gateway not found
+- Ensure `clickhouse_gateway_config.json` exists
+- Redeploy using `python deploy_clickhouse_gateway.py`
 
-2. **MCP Server Issues**
-   - Ensure UV is installed: `curl -LsSf https://astral.sh/uv/install.sh | sh`
-   - Check MCP server logs for connection errors
+### Authentication errors
+- Token may have expired, redeploy to get fresh credentials
+- Check Cognito configuration in AWS Console
 
-3. **Port Already in Use**
-   - Kill existing process: `lsof -ti :8001 | xargs kill -9`
-   - Or use a different port in the startup script
+### Lambda errors
+- Check Lambda logs: `aws logs tail /aws/lambda/clickhouse-notification-lambda --follow`
+- Verify SNS topic permissions
 
-### Debug Mode
+### No notifications received
+- Confirm SNS subscription via email
+- Check SNS topic has correct permissions
+- Verify Lambda has SNS publish permissions
 
-Enable detailed logging:
+## Cleanup
+
+To remove all resources:
 
 ```bash
-export STRANDS_LOG_LEVEL=DEBUG
-python start_analyst_ui.py
+# Delete Gateway
+aws bedrock-agentcore-control delete-gateway --gateway-id $(jq -r '.gateway_id' clickhouse_gateway_config.json)
+
+# Delete Lambda function
+aws lambda delete-function --function-name clickhouse-notification-lambda
+
+# Delete SNS topic
+aws sns delete-topic --topic-arn $(jq -r '.sns_topic_arn' clickhouse_gateway_config.json)
+
+# Remove config file
+rm clickhouse_gateway_config.json
 ```
 
-## 📚 References
+## References
 
-- [Strands SDK Documentation](https://strandsagents.com/)
-- [ClickHouse MCP Server](https://github.com/ClickHouse/mcp-clickhouse)
-- [ClickHouse Cloud Documentation](https://clickhouse.com/docs)
+- [AgentCore Gateway Documentation](https://aws.github.io/bedrock-agentcore-starter-toolkit/examples/gateway-integration.md)
 - [Model Context Protocol](https://modelcontextprotocol.io)
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Add tests for new functionality
-4. Ensure all tests pass
-5. Submit a pull request
-
-## 📄 License
-
-MIT License - see LICENSE file for details.
-
----
-
-Built with ❤️ using [Strands SDK](https://strandsagents.com/) and [ClickHouse MCP](https://github.com/ClickHouse/mcp-clickhouse)
+- [Strands SDK](https://strandsagents.com/)
