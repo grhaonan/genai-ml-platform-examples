@@ -5,3 +5,4 @@ mcp
 bedrock-agentcore-starter-toolkit
 requests
 python-dotenv
+pyarrow

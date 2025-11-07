@@ -1,35 +1,55 @@
-# ClickHouse AgentCore Gateway Setup
+# SRE Helper Agent Setup
 
-This guide explains how to set up the AgentCore Gateway for sending ClickHouse analysis summaries to SNS.
+This guide explains how to set up an AI-powered SRE helper agent that
+- Connects to ClickHouse for real-time log/trace query, detects errors/performance issues live
+- Develops an autonomous AI agent using open-source framework (Strands Agent SDK and MCP) that automatically detects and analyzes system issues and errors, sends notifications when problems are identified, and executes corrective actions through REST API calls.
+- Deploys the agent to AWS Bedrock AgentCore with production-grade reliability. security and observability
 
 ## Architecture
 
 ```
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   ClickHouse    │    │   AgentCore     │    │   AgentCore     │    │   Lambda +      │
-│   Analyst       │◄──►│   Runtime       │◄──►│   Gateway       │◄──►│   SNS Topic     │
-│   Agent         │    │   (with Memory) │    │   (OAuth)       │    │                 │
+│   SRE Helper    │    │   AgentCore     │    │   AgentCore     │    │   Lambda +      │
+│   Agent         │◄──►│   Runtime       │◄──►│   Gateway       │◄──►│   SNS Topic     │
+│                 │    │                 │    │   (OAuth)       │    │                 │
 └─────────────────┘    └─────────────────┘    └─────────────────┘    └─────────────────┘
+         │
+         ▼
+┌─────────────────┐
+│   ClickHouse    │
+│   MCP Server    │
+│                 │
+└─────────────────┘
 ```
 
 ## Components
 
-1. **ClickHouse MCP Server**: Provides database query tools (stdio connection)
+1. **ClickHouse MCP Server**: Provides database query tools (stdio connection) - hosted within AgentCore Runtime
 2. **AgentCore Gateway**: Exposes Lambda function as MCP tool (HTTP connection)
-3. **Lambda Function**: Sends analysis summaries to SNS topic
-4. **SNS Topic**: Delivers notifications to subscribers
+3. **Notification Lambda Function**: Sends analysis summaries to SNS topic
+4. **Private REST API Lambda Function**: Run private REST API to fix issue
+5. **SNS Topic**: Delivers notifications to subscribers
 
 ## Deployment Steps
 
+### Prerequisites
+1. Python 3.10+
+2. AWS account and credentials configured
+3. AWS CLI configured with appropriate permissions
+4. AWS Account with Amazon Bedrock, Amazon Bedrock Agentcore, Lambda, SNS access
+   
 ### 1. Deploy the Gateway and Lambda
 
 ```bash
 # Make sure you're in the project directory
-cd /Users/wangaws/Documents/workshop/genai-ml-platform-examples/demo-apps/data-analysis-agent
+cd genai-ml-platform-examples/demo-apps/data-analysis-agent
 
 # Activate virtual environment
 python3 -m venv .venv
 source .venv/bin/activate 
+
+# Install the dependency 
+pip install -r requirements.txt 
 
 # Deploy Gateway, Lambda, and SNS topic
 python deploy_clickhouse_gateway.py
@@ -69,9 +89,7 @@ The agent will automatically detect the Gateway configuration and include the no
 
 ```bash
 # Test the agent with a query that triggers notification
-agentcore invoke '{
-  "prompt": "Analyze the sales table and send me a summary notification"
-}'
+agentcore invoke '{"prompt": "there is a outage happened in recommedationservice, summerize the potantial root cause and send me a notification"}'
 ```
 
 ## Gateway Configuration
@@ -145,17 +163,7 @@ Sends a ClickHouse analysis summary to the SNS topic.
 To remove all resources:
 
 ```bash
-# Delete Gateway
-aws bedrock-agentcore-control delete-gateway --gateway-id $(jq -r '.gateway_id' clickhouse_gateway_config.json)
-
-# Delete Lambda function
-aws lambda delete-function --function-name clickhouse-notification-lambda
-
-# Delete SNS topic
-aws sns delete-topic --topic-arn $(jq -r '.sns_topic_arn' clickhouse_gateway_config.json)
-
-# Remove config file
-rm clickhouse_gateway_config.json
+python cleanup.py
 ```
 
 ## References

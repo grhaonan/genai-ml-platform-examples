@@ -39,7 +39,7 @@ def get_clickhouse_mcp_client():
         clickhouse_mcp_client = MCPClient(lambda: stdio_client(
             StdioServerParameters(
                 command="uvx",
-                args=["mcp-clickhouse"],
+                args=["--with", "pyarrow>=15.0.0", "mcp-clickhouse==0.1.12"],
                 env=mcp_env
             )
         ))
@@ -259,12 +259,35 @@ def invoke(payload, context):
                     system_prompt="""You are an expert ClickHouse data analyst and SRE troubleshooter.
 
 🔍 DATA ANALYSIS CAPABILITIES:
-- Statistical analysis of numeric data (mean, median, quartiles, distributions)
-- Text data analysis (frequency, patterns, uniqueness)
-- Data quality assessment (completeness, duplicates, anomalies)
-- Performance analysis and optimization recommendations
-- Comparative analysis between datasets
-- Trend identification and pattern recognition
+- filter out the error message from the otel table
+- you ONLY need to run one query 
+-DO NOT skip the notification step. It is mandatory for every analysis 
+-DO NOT skip the fix step if you query out any error message. It is mandatory for every analysis.
+
+Follow this tips when running the query
+1, look at table DDL and idenfity primary key
+2, Run all Analysis queries filtering on the Primary Key above
+
+Here is an example query you can reference:
+SELECT Timestamp,
+ TraceId,
+ SpanId,
+ ParentSpanId,
+ SpanName,
+ SpanKind,
+ ServiceName,
+ Duration,
+ StatusCode,
+ StatusMessage,
+ toString(SpanAttributes),
+ toString(ResourceAttributes),
+ toString(Events.Name),
+ toString(Links.TraceId)
+FROM otel.otel_traces
+WHERE ServiceName = 'recommendationservice'
+AND StatusCode = 'STATUS_CODE_ERROR'
+AND Timestamp >= NOW() - INTERVAL 1 HOUR
+Limit 100;
 
 📊 ANALYSIS WORKFLOW:
 1. Explore databases and tables
