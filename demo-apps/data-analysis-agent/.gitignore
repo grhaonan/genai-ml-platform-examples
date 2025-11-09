@@ -1,0 +1,9 @@
+# AgentCore
+.bedrock_agentcore/
+.bedrock_agentcore.yaml
+
+# Gateway configuration
+clickhouse_gateway_config.json
+
+# Lambda deployment
+*.zip
