@@ -77,7 +77,7 @@ aws sns subscribe \
 
 ```bash
 # Configure the agent (if not already done)
-agentcore configure -e agentcore_clickhouse_analyst.py
+agentcore configure -e agentcore_clickhouse_analyst.py --disable-memory
 
 # Deploy or update the runtime
 agentcore launch
