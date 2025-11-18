@@ -373,7 +373,6 @@ def main():
     os.remove(zip_path)
     
     # Step 6: Test Bedrock invocation
-    print("\n🤖 Testing Bedrock Claude Sonnet 4.5...")
     bedrock = boto3.client('bedrock-runtime', region_name=REGION)
     
     try:
