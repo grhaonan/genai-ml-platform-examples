@@ -386,7 +386,6 @@ def main():
     )
     
     result = json.loads(response['body'].read())
-    #print(f"✓ Bedrock response: {result['content'][0]['text']}")
     
     return config
 
