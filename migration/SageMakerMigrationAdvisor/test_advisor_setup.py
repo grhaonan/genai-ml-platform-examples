@@ -39,12 +39,12 @@ def test_files():
     print("\n📁 Testing required files...")
     
     required_files = [
-        'streamlit_sagemaker_advisor.py',
+        'sagemaker_migration_advisor.py',
         'prompts.py',
         'logger_config.py',
         'tools/__init__.py',
         'tools/user_prompt.py',
-        'streamlit_config.py'
+        'advisor_config.py'
     ]
     
     missing_files = []
@@ -147,9 +147,9 @@ def test_bedrock_access():
         print(f"  ❌ Unexpected error: {e}")
         return False
 
-def test_streamlit_config():
-    """Test Streamlit configuration"""
-    print("\n⚙️  Testing Streamlit configuration...")
+def test_advisor_config():
+    """Test advisor configuration"""
+    print("\n⚙️  Testing advisor configuration...")
     
     try:
         import streamlit as st
@@ -157,10 +157,10 @@ def test_streamlit_config():
         
         # Test if we can import our config
         try:
-            import streamlit_config
-            print("  ✅ Streamlit config loaded")
+            import advisor_config
+            print("  ✅ Advisor config loaded")
         except ImportError:
-            print("  ⚠️  streamlit_config.py not found (optional)")
+            print("  ⚠️  advisor_config.py not found (optional)")
         
         return True
         
@@ -178,7 +178,7 @@ def main():
         ("File Test", test_files),
         ("AWS Config Test", test_aws_config),
         ("Bedrock Access Test", test_bedrock_access),
-        ("Streamlit Config Test", test_streamlit_config)
+        ("Advisor Config Test", test_advisor_config)
     ]
     
     results = []
@@ -208,10 +208,10 @@ def main():
     
     if passed == total:
         print("\n🎉 All tests passed! You're ready to run the Streamlit app.")
-        print("   Run: python run_streamlit_app.py")
+        print("   Run: python run_sagemaker_migration_advisor.py")
     else:
         print(f"\n⚠️  {total - passed} test(s) failed. Please fix the issues above.")
-        print("   Check the installation guide in STREAMLIT_README.md")
+        print("   Check the installation guide in README.md")
     
     return passed == total
 

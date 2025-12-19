@@ -10,7 +10,7 @@ APP_ICON = "🚀"
 PAGE_LAYOUT = "wide"
 
 # Streamlit Server Settings
-DEFAULT_PORT = 8501
+DEFAULT_PORT = 8502
 DEFAULT_HOST = "localhost"
 
 # AWS Bedrock Model Configuration
@@ -34,7 +34,7 @@ BEDROCK_MODELS = [
 
 # File Paths
 OUTPUT_DIR = "generated-diagrams"
-INTERACTION_LOG_FILE = "streamlit_agent_interactions.txt"
+INTERACTION_LOG_FILE = "advisor_agent_interactions.txt"
 TEMP_UPLOAD_DIR = "temp_uploads"
 
 # UI Configuration
@@ -140,6 +140,10 @@ CUSTOM_CSS = """
 ENABLE_DIAGRAM_GENERATION = True
 ENABLE_TCO_ANALYSIS = True
 ENABLE_CLOUDFORMATION = False  # Optional CloudFormation generation
+
+# Image Processing Settings
+MAX_IMAGE_DIMENSION = 4000  # Maximum image dimension in pixels (Bedrock limit is 8000)
+IMAGE_QUALITY = 85  # JPEG quality for resized images (1-100)
 ENABLE_DEBUG_MODE = os.environ.get('STREAMLIT_DEBUG', 'false').lower() == 'true'
 
 # Performance Settings
