@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """
-Modified Launcher script for SageMaker Migration Advisor Streamlit Application
-(Skips strands package checks)
+Launcher script for SageMaker Migration Advisor Streamlit Application
 """
 
 import subprocess
@@ -10,9 +9,11 @@ import os
 from pathlib import Path
 
 def check_requirements():
-    """Check if required packages are installed (excluding strands packages)"""
+    """Check if required packages are installed"""
     required_packages = [
         'streamlit',
+        'strands',
+        'strands_tools',
         'boto3',
         'PIL'  # Pillow is imported as PIL
     ]
@@ -30,7 +31,7 @@ def check_requirements():
         for package in missing_packages:
             print(f"   - {package}")
         print("\n📦 Install missing packages with:")
-        print("   pip install -r streamlit_requirements_minimal.txt")
+        print("   pip install -r requirements.txt")
         return False
     
     return True
@@ -53,31 +54,29 @@ def check_aws_credentials():
 
 def main():
     """Main launcher function"""
-    print("🚀 SageMaker Migration Advisor Launcher (Modified)")
+    print("🚀 SageMaker Migration Advisor Launcher")
     print("=" * 50)
     
     # Check current directory
     current_dir = Path.cwd()
-    app_file = current_dir / "streamlit_sagemaker_advisor.py"
+    app_file = current_dir / "sagemaker_migration_advisor.py"
     
     if not app_file.exists():
         print(f"❌ Application file not found: {app_file}")
         print("   Make sure you're running this from the correct directory.")
         sys.exit(1)
     
-    # Check requirements (excluding strands packages)
+    # Check requirements
     print("📋 Checking requirements...")
     if not check_requirements():
         sys.exit(1)
-    
-    print("⚠️  Note: Skipping strands package checks - application may fail if these are required")
     
     # Check AWS credentials
     print("🔐 Checking AWS credentials...")
     if not check_aws_credentials():
         print("   ⚠️  Continuing anyway - you may encounter authentication errors.")
     
-    # Check for required files (skip if they don't exist)
+    # Check for required files
     required_files = [
         "prompts.py",
         "logger_config.py",
@@ -91,12 +90,13 @@ def main():
             missing_files.append(file_path)
     
     if missing_files:
-        print("⚠️  Missing some files (may cause errors):")
+        print("❌ Missing required files:")
         for file_path in missing_files:
             print(f"   - {file_path}")
-        print("   Continuing anyway...")
+        print("   Make sure all required files are present.")
+        sys.exit(1)
     
-    print("✅ Basic checks passed!")
+    print("✅ All checks passed!")
     print("\n🌐 Starting Streamlit application...")
     print("   The app will open in your default web browser.")
     print("   Press Ctrl+C to stop the application.")
@@ -122,7 +122,7 @@ def main():
             except:
                 print(f"   ⚠️  Could not automatically free port {port}.")
                 print(f"   Please run: lsof -ti:{port} | xargs kill -9")
-                print(f"   Or use a different port by editing run_streamlit_app.py")
+                print(f"   Or use a different port by editing run_sagemaker_migration_advisor.py")
                 sys.exit(1)
     except:
         pass  # If we can't check, just try to start anyway
@@ -131,7 +131,7 @@ def main():
     try:
         subprocess.run([
             sys.executable, "-m", "streamlit", "run", 
-            "streamlit_sagemaker_advisor.py",
+            "sagemaker_migration_advisor.py",
             "--server.port", str(port),
             "--server.address", "localhost"
         ], check=True)
@@ -140,7 +140,7 @@ def main():
     except subprocess.CalledProcessError as e:
         print(f"❌ Error running Streamlit: {e}")
         print(f"\n💡 Try running manually with a different port:")
-        print(f"   streamlit run streamlit_sagemaker_advisor.py --server.port 8502")
+        print(f"   streamlit run sagemaker_migration_advisor.py --server.port 8502")
         sys.exit(1)
 
 if __name__ == "__main__":
