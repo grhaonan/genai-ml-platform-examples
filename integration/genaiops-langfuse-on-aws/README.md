@@ -47,6 +47,8 @@ LANGFUSE_SECRET_KEY=sk-lf-your-actual-secret-key
 LANGFUSE_HOST=https://your-langfuse-instance.com
 ```
 
+> **Important**: When copying credentials from the Langfuse portal, note that newer versions of Langfuse display `LANGFUSE_BASE_URL`. However, these labs use an older version of the Langfuse library that expects `LANGFUSE_HOST`. Please use `LANGFUSE_HOST` instead of `LANGFUSE_BASE_URL` in your `.env` file. The value (URL) remains the same—only the variable name differs.
+
 ### 2. Install Dependencies
 
 Each lab has its own requirements. Install dependencies as instructed in the Jupyter Notebook.
