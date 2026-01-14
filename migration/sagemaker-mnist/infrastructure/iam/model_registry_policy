@@ -1,0 +1,38 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "AllowModelRegistryAccess",
+      "Effect": "Allow",
+      "Action": [
+        "sagemaker:CreateModelPackage",
+        "sagemaker:CreateModelPackageGroup",
+        "sagemaker:DescribeModelPackage",
+        "sagemaker:DescribeModelPackageGroup",
+        "sagemaker:ListModelPackages",
+        "sagemaker:ListModelPackageGroups",
+        "sagemaker:UpdateModelPackage"
+      ],
+      "Resource": [
+        "arn:aws:sagemaker:us-east-1:123456789012:model-package/*",
+        "arn:aws:sagemaker:us-east-1:123456789012:model-package-group/*"
+      ]
+    },
+    {
+      "Sid": "AllowModelApprovalWorkflow",
+      "Effect": "Allow",
+      "Action": [
+        "sagemaker:UpdateModelPackage"
+      ],
+      "Resource": "arn:aws:sagemaker:us-east-1:123456789012:model-package/*",
+      "Condition": {
+        "StringEquals": {
+          "sagemaker:ModelApprovalStatus": [
+            "Approved",
+            "Rejected"
+          ]
+        }
+      }
+    }
+  ]
+}

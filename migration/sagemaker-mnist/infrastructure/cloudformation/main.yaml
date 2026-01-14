@@ -1,0 +1,333 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: SageMaker infrastructure for sagemigrator-project
+Outputs:
+  DefaultUserProfileName:
+    Description: Name of the default user profile
+    Export:
+      Name:
+        Fn::Sub: ${AWS::StackName}-DefaultUserProfile
+    Value:
+      Ref: SageMakerDefaultUserProfile
+  ExecutionRoleArn:
+    Description: ARN of the SageMaker execution role
+    Export:
+      Name:
+        Fn::Sub: ${AWS::StackName}-ExecutionRole
+    Value:
+      Fn::GetAtt:
+      - SageMakerExecutionRole
+      - Arn
+  LogGroupName:
+    Description: Name of the CloudWatch log group
+    Export:
+      Name:
+        Fn::Sub: ${AWS::StackName}-LogGroup
+    Value:
+      Ref: SageMakerLogGroup
+  ModelPackageGroupName:
+    Description: Name of the model package group
+    Export:
+      Name:
+        Fn::Sub: ${AWS::StackName}-ModelPackageGroup
+    Value:
+      Ref: SageMakerModelPackageGroup
+  PrivateSpaceName:
+    Description: Name of the private space
+    Export:
+      Name:
+        Fn::Sub: ${AWS::StackName}-PrivateSpace
+    Value:
+      Ref: SageMakerPrivateSpace
+  S3BucketName:
+    Description: Name of the S3 bucket for SageMaker artifacts
+    Export:
+      Name:
+        Fn::Sub: ${AWS::StackName}-S3Bucket
+    Value:
+      Ref: SageMakerS3Bucket
+  StudioDomainId:
+    Description: ID of the SageMaker Studio Domain
+    Export:
+      Name:
+        Fn::Sub: ${AWS::StackName}-StudioDomain
+    Value:
+      Ref: SageMakerStudioDomain
+Parameters:
+  Environment:
+    AllowedValues:
+    - dev
+    - staging
+    - prod
+    Default: dev
+    Description: Environment name
+    Type: String
+  InstanceType:
+    Default: ml.m5.large
+    Description: SageMaker training instance type
+    Type: String
+  KMSKeyId:
+    Default: ''
+    Description: KMS Key ID for encryption (optional)
+    Type: String
+  ProjectName:
+    Default: sagemigrator-project
+    Description: Name of the project for resource naming
+    Type: String
+Resources:
+  SageMakerDefaultUserProfile:
+    DependsOn:
+    - SageMakerStudioDomain
+    Properties:
+      DomainId:
+        Ref: SageMakerStudioDomain
+      UserProfileName:
+        Fn::Sub: ${ProjectName}-default-user
+      UserSettings:
+        ExecutionRole:
+          Fn::GetAtt:
+          - SageMakerExecutionRole
+          - Arn
+    Type: AWS::SageMaker::UserProfile
+  SageMakerExecutionRole:
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+        - Action: sts:AssumeRole
+          Effect: Allow
+          Principal:
+            Service:
+            - sagemaker.amazonaws.com
+          Sid: AllowSageMakerAssumeRole
+        Version: '2012-10-17'
+      ManagedPolicyArns:
+      - arn:aws:iam::aws:policy/AmazonSageMakerFullAccess
+      Policies:
+      - PolicyDocument:
+          Statement:
+          - Action:
+            - s3:GetObject
+            - s3:PutObject
+            - s3:DeleteObject
+            - s3:ListBucket
+            Effect: Allow
+            Resource:
+            - Fn::GetAtt:
+              - SageMakerS3Bucket
+              - Arn
+            - Fn::Sub:
+              - ${BucketArn}/*
+              - BucketArn:
+                  Fn::GetAtt:
+                  - SageMakerS3Bucket
+                  - Arn
+            Sid: AllowS3BucketAccess
+          Version: '2012-10-17'
+        PolicyName: SageMakerS3Access
+      - PolicyDocument:
+          Statement:
+          - Action:
+            - logs:CreateLogGroup
+            - logs:CreateLogStream
+            - logs:PutLogEvents
+            - logs:DescribeLogStreams
+            Effect: Allow
+            Resource:
+            - Fn::GetAtt:
+              - SageMakerLogGroup
+              - Arn
+            Sid: AllowCloudWatchLogs
+          Version: '2012-10-17'
+        PolicyName: SageMakerLogsAccess
+      - PolicyDocument:
+          Statement:
+          - Action:
+            - kms:Decrypt
+            - kms:GenerateDataKey
+            - kms:DescribeKey
+            Effect: Allow
+            Resource:
+            - Fn::Sub: arn:aws:kms:${AWS::Region}:${AWS::AccountId}:key/*
+            Sid: AllowKMSAccess
+          Version: '2012-10-17'
+        PolicyName: SageMakerKMSAccess
+      RoleName:
+        Fn::Sub: ${ProjectName}-SageMaker-ExecutionRole-${Environment}
+    Type: AWS::IAM::Role
+  SageMakerLogGroup:
+    Properties:
+      LogGroupName:
+        Fn::Sub: /aws/sagemaker/${ProjectName}-${Environment}
+      RetentionInDays: 14
+    Type: AWS::Logs::LogGroup
+  SageMakerModelPackageGroup:
+    Properties:
+      ModelPackageGroupDescription:
+        Fn::Sub: Model package group for ${ProjectName} project
+      ModelPackageGroupName:
+        Fn::Sub: ${ProjectName}-model-package-group
+      ModelPackageGroupPolicy:
+        Statement:
+        - Action:
+          - sagemaker:DescribeModelPackage
+          - sagemaker:ListModelPackages
+          - sagemaker:UpdateModelPackage
+          - sagemaker:CreateModel
+          Effect: Allow
+          Principal:
+            AWS:
+              Fn::Sub: arn:aws:iam::${AWS::AccountId}:root
+          Resource:
+            Fn::Sub: arn:aws:sagemaker:${AWS::Region}:${AWS::AccountId}:model-package-group/${ProjectName}-model-package-group
+          Sid: AllowModelPackageAccess
+        Version: '2012-10-17'
+      Tags:
+      - Key: Project
+        Value:
+          Ref: ProjectName
+      - Key: Environment
+        Value:
+          Ref: Environment
+    Type: AWS::SageMaker::ModelPackageGroup
+  SageMakerPrivateSpace:
+    DependsOn:
+    - SageMakerDefaultUserProfile
+    Properties:
+      DomainId:
+        Ref: SageMakerStudioDomain
+      OwnershipSettings:
+        OwnerUserProfileName:
+          Fn::Sub: ${ProjectName}-default-user
+      SpaceName:
+        Fn::Sub: ${ProjectName}-private-space
+      SpaceSettings:
+        AppType: JupyterLab
+        SpaceStorageSettings:
+          EbsStorageSettings:
+            EbsVolumeSizeInGb: 20
+      SpaceSharingSettings:
+        SharingType: Private
+    Type: AWS::SageMaker::Space
+  SageMakerPrivateSubnet:
+    Properties:
+      AvailabilityZone:
+        Fn::Select:
+        - 0
+        - Fn::GetAZs: ''
+      CidrBlock: 10.0.1.0/24
+      Tags:
+      - Key: Name
+        Value:
+          Fn::Sub: ${ProjectName}-private-subnet
+      VpcId:
+        Ref: SageMakerVPC
+    Type: AWS::EC2::Subnet
+  SageMakerS3Bucket:
+    Properties:
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+        - BucketKeyEnabled: true
+          ServerSideEncryptionByDefault:
+            SSEAlgorithm: AES256
+      BucketName:
+        Fn::Sub: sagemigrator-project-sagemaker-bucket-${AWS::AccountId}-${AWS::Region}
+      LifecycleConfiguration:
+        Rules:
+        - AbortIncompleteMultipartUpload:
+            DaysAfterInitiation: 7
+          Id: DeleteIncompleteMultipartUploads
+          Status: Enabled
+        - Id: TransitionToIA
+          Status: Enabled
+          Transitions:
+          - StorageClass: STANDARD_IA
+            TransitionInDays: 30
+      NotificationConfiguration:
+        LambdaConfigurations: []
+        QueueConfigurations: []
+        TopicConfigurations: []
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      VersioningConfiguration:
+        Status: Enabled
+    Type: AWS::S3::Bucket
+  SageMakerStudioDomain:
+    DependsOn:
+    - SageMakerExecutionRole
+    - SageMakerVPC
+    - SageMakerPrivateSubnet
+    Properties:
+      AuthMode: IAM
+      DefaultUserSettings:
+        ExecutionRole:
+          Fn::GetAtt:
+          - SageMakerExecutionRole
+          - Arn
+        SecurityGroups:
+        - Ref: SageMakerStudioSecurityGroup
+        SharingSettings:
+          NotebookOutputOption: Allowed
+          S3OutputPath:
+            Fn::Sub: s3://${SageMakerS3Bucket}/studio-notebooks/
+      DomainName:
+        Fn::Sub: ${ProjectName}-studio-domain-${Environment}
+      DomainSettings:
+        SecurityGroupIds:
+        - Ref: SageMakerStudioSecurityGroup
+      SubnetIds:
+      - Ref: SageMakerPrivateSubnet
+      VpcId:
+        Ref: SageMakerVPC
+    Type: AWS::SageMaker::Domain
+  SageMakerStudioSecurityGroup:
+    Properties:
+      GroupDescription: Security group for SageMaker Studio Domain
+      SecurityGroupEgress:
+      - CidrIp: 0.0.0.0/0
+        Description: Allow all outbound traffic
+        IpProtocol: '-1'
+      SecurityGroupIngress:
+      - CidrIp: 10.0.0.0/16
+        Description: Allow HTTPS within VPC
+        FromPort: 443
+        IpProtocol: tcp
+        ToPort: 443
+      Tags:
+      - Key: Name
+        Value:
+          Fn::Sub: ${ProjectName}-studio-sg
+      VpcId:
+        Ref: SageMakerVPC
+    Type: AWS::EC2::SecurityGroup
+  SageMakerVPC:
+    Properties:
+      CidrBlock: 10.0.0.0/16
+      EnableDnsHostnames: true
+      EnableDnsSupport: true
+      Tags:
+      - Key: Name
+        Value:
+          Fn::Sub: ${ProjectName}-vpc
+    Type: AWS::EC2::VPC
+  SageMakerVPCEndpoint:
+    Properties:
+      PolicyDocument:
+        Statement:
+        - Action:
+          - sagemaker:*
+          Effect: Allow
+          Principal: '*'
+          Resource: '*'
+        Version: '2012-10-17'
+      SecurityGroupIds:
+      - Ref: SageMakerStudioSecurityGroup
+      ServiceName:
+        Fn::Sub: com.amazonaws.${AWS::Region}.sagemaker.api
+      SubnetIds:
+      - Ref: SageMakerPrivateSubnet
+      VpcEndpointType: Interface
+      VpcId:
+        Ref: SageMakerVPC
+    Type: AWS::EC2::VPCEndpoint

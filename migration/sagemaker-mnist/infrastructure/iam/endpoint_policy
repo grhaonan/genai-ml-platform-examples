@@ -1,0 +1,49 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "AllowEndpointOperations",
+      "Effect": "Allow",
+      "Action": [
+        "sagemaker:CreateEndpoint",
+        "sagemaker:CreateEndpointConfig",
+        "sagemaker:CreateModel",
+        "sagemaker:DeleteEndpoint",
+        "sagemaker:DeleteEndpointConfig",
+        "sagemaker:DeleteModel",
+        "sagemaker:DescribeEndpoint",
+        "sagemaker:DescribeEndpointConfig",
+        "sagemaker:DescribeModel",
+        "sagemaker:InvokeEndpoint",
+        "sagemaker:ListEndpoints",
+        "sagemaker:ListEndpointConfigs",
+        "sagemaker:ListModels",
+        "sagemaker:UpdateEndpoint",
+        "sagemaker:UpdateEndpointWeightsAndCapacities"
+      ],
+      "Resource": [
+        "arn:aws:sagemaker:us-east-1:123456789012:endpoint/*",
+        "arn:aws:sagemaker:us-east-1:123456789012:endpoint-config/*",
+        "arn:aws:sagemaker:us-east-1:123456789012:model/*"
+      ]
+    },
+    {
+      "Sid": "AllowAutoScaling",
+      "Effect": "Allow",
+      "Action": [
+        "application-autoscaling:DeleteScalingPolicy",
+        "application-autoscaling:DeregisterScalableTarget",
+        "application-autoscaling:DescribeScalableTargets",
+        "application-autoscaling:DescribeScalingPolicies",
+        "application-autoscaling:PutScalingPolicy",
+        "application-autoscaling:RegisterScalableTarget"
+      ],
+      "Resource": "*",
+      "Condition": {
+        "StringEquals": {
+          "application-autoscaling:service-namespace": "sagemaker"
+        }
+      }
+    }
+  ]
+}

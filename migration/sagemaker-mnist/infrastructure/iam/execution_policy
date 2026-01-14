@@ -1,0 +1,108 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "AllowSageMakerTrainingJobs",
+      "Effect": "Allow",
+      "Action": [
+        "sagemaker:CreateTrainingJob",
+        "sagemaker:DescribeTrainingJob",
+        "sagemaker:StopTrainingJob",
+        "sagemaker:ListTrainingJobs"
+      ],
+      "Resource": "arn:aws:sagemaker:us-east-1:123456789012:training-job/*"
+    },
+    {
+      "Sid": "AllowSageMakerProcessingJobs",
+      "Effect": "Allow",
+      "Action": [
+        "sagemaker:CreateProcessingJob",
+        "sagemaker:DescribeProcessingJob",
+        "sagemaker:StopProcessingJob",
+        "sagemaker:ListProcessingJobs"
+      ],
+      "Resource": "arn:aws:sagemaker:us-east-1:123456789012:processing-job/*"
+    },
+    {
+      "Sid": "AllowSageMakerPipelines",
+      "Effect": "Allow",
+      "Action": [
+        "sagemaker:CreatePipeline",
+        "sagemaker:StartPipelineExecution",
+        "sagemaker:StopPipelineExecution",
+        "sagemaker:DescribePipeline",
+        "sagemaker:DescribePipelineExecution",
+        "sagemaker:ListPipelineExecutions",
+        "sagemaker:ListPipelines"
+      ],
+      "Resource": [
+        "arn:aws:sagemaker:us-east-1:123456789012:pipeline/*",
+        "arn:aws:sagemaker:us-east-1:123456789012:pipeline-execution/*"
+      ]
+    },
+    {
+      "Sid": "AllowS3BucketAccess",
+      "Effect": "Allow",
+      "Action": [
+        "s3:GetBucketLocation",
+        "s3:ListBucket"
+      ],
+      "Resource": "arn:aws:s3:::sagemigrator-project-sagemaker-bucket-123456789012-us-east-1"
+    },
+    {
+      "Sid": "AllowS3ObjectAccess",
+      "Effect": "Allow",
+      "Action": [
+        "s3:GetObject",
+        "s3:PutObject",
+        "s3:DeleteObject"
+      ],
+      "Resource": "arn:aws:s3:::sagemigrator-project-sagemaker-bucket-123456789012-us-east-1/*"
+    },
+    {
+      "Sid": "AllowS3MultipartUpload",
+      "Effect": "Allow",
+      "Action": [
+        "s3:AbortMultipartUpload",
+        "s3:ListMultipartUploadParts"
+      ],
+      "Resource": "arn:aws:s3:::sagemigrator-project-sagemaker-bucket-123456789012-us-east-1/*"
+    },
+    {
+      "Sid": "AllowCloudWatchLogs",
+      "Effect": "Allow",
+      "Action": [
+        "logs:CreateLogGroup",
+        "logs:CreateLogStream",
+        "logs:PutLogEvents",
+        "logs:DescribeLogStreams"
+      ],
+      "Resource": "arn:aws:logs:us-east-1:123456789012:log-group:/aws/sagemaker/sagemigrator-project-dev:*"
+    },
+    {
+      "Sid": "AllowCloudWatchMetrics",
+      "Effect": "Allow",
+      "Action": [
+        "cloudwatch:PutMetricData",
+        "cloudwatch:GetMetricStatistics",
+        "cloudwatch:ListMetrics"
+      ],
+      "Resource": "*",
+      "Condition": {
+        "StringEquals": {
+          "cloudwatch:namespace": "AWS/SageMaker"
+        }
+      }
+    },
+    {
+      "Sid": "AllowKMSAccess",
+      "Effect": "Allow",
+      "Action": [
+        "kms:Decrypt",
+        "kms:GenerateDataKey",
+        "kms:DescribeKey"
+      ],
+      "Resource": "arn:aws:kms:us-east-1:123456789012:key/*"
+    }
+  ]
+}
