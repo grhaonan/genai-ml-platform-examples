@@ -1,0 +1,70 @@
+Metadata-Version: 2.4
+Name: sagemigrator
+Version: 0.1.0
+Summary: Intelligent EC2 to SageMaker Migration System
+Home-page: https://github.com/sagemigrator/sagemigrator
+Author: SageMigrator Team
+Author-email: SageMigrator Team <team@sagemigrator.dev>
+License: MIT
+Project-URL: Homepage, https://github.com/sagemigrator/sagemigrator
+Project-URL: Documentation, https://sagemigrator.readthedocs.io
+Project-URL: Repository, https://github.com/sagemigrator/sagemigrator.git
+Project-URL: Bug Tracker, https://github.com/sagemigrator/sagemigrator/issues
+Keywords: sagemaker,aws,migration,machine-learning,mlops
+Classifier: Development Status :: 3 - Alpha
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Topic :: Software Development :: Libraries :: Python Modules
+Classifier: Topic :: Scientific/Engineering :: Artificial Intelligence
+Classifier: Topic :: System :: Systems Administration
+Requires-Python: >=3.8
+Description-Content-Type: text/markdown
+Requires-Dist: click>=8.0.0
+Requires-Dist: pyyaml>=6.0
+Requires-Dist: boto3>=1.26.0
+Requires-Dist: botocore>=1.29.0
+Requires-Dist: pandas>=1.5.0
+Requires-Dist: numpy>=1.21.0
+Requires-Dist: ast-tools>=0.1.0
+Requires-Dist: pathspec>=0.10.0
+Requires-Dist: jinja2>=3.1.0
+Requires-Dist: python-dotenv>=0.19.0
+Requires-Dist: structlog>=22.0.0
+Provides-Extra: dev
+Requires-Dist: pytest>=7.0.0; extra == "dev"
+Requires-Dist: pytest-cov>=4.0.0; extra == "dev"
+Requires-Dist: hypothesis>=6.0.0; extra == "dev"
+Requires-Dist: black>=22.0.0; extra == "dev"
+Requires-Dist: flake8>=5.0.0; extra == "dev"
+Requires-Dist: mypy>=1.0.0; extra == "dev"
+Requires-Dist: pre-commit>=2.20.0; extra == "dev"
+Provides-Extra: docs
+Requires-Dist: sphinx>=5.0.0; extra == "docs"
+Requires-Dist: sphinx-rtd-theme>=1.0.0; extra == "docs"
+Requires-Dist: myst-parser>=0.18.0; extra == "docs"
+Provides-Extra: prod
+Requires-Dist: gunicorn>=20.0.0; extra == "prod"
+Requires-Dist: uvicorn>=0.18.0; extra == "prod"
+Provides-Extra: minimal
+Provides-Extra: all
+Requires-Dist: pytest>=7.0.0; extra == "all"
+Requires-Dist: pytest-cov>=4.0.0; extra == "all"
+Requires-Dist: hypothesis>=6.0.0; extra == "all"
+Requires-Dist: black>=22.0.0; extra == "all"
+Requires-Dist: flake8>=5.0.0; extra == "all"
+Requires-Dist: mypy>=1.0.0; extra == "all"
+Requires-Dist: pre-commit>=2.20.0; extra == "all"
+Requires-Dist: sphinx>=5.0.0; extra == "all"
+Requires-Dist: sphinx-rtd-theme>=1.0.0; extra == "all"
+Requires-Dist: myst-parser>=0.18.0; extra == "all"
+Requires-Dist: gunicorn>=20.0.0; extra == "all"
+Requires-Dist: uvicorn>=0.18.0; extra == "all"
+Dynamic: author
+Dynamic: home-page
+Dynamic: requires-python

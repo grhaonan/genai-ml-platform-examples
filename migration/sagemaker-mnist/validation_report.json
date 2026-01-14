@@ -1,0 +1,127 @@
+{
+  "compatibility_checks": [
+    {
+      "check_name": "Test file test_torchscript_compatibility.py",
+      "status": "ValidationStatus.PASSED",
+      "message": "Required test file test_torchscript_compatibility.py is present",
+      "details": {
+        "file_size": 3922
+      },
+      "severity": "high"
+    },
+    {
+      "check_name": "Test file test_data_loading.py",
+      "status": "ValidationStatus.PASSED",
+      "message": "Required test file test_data_loading.py is present",
+      "details": {
+        "file_size": 4050
+      },
+      "severity": "high"
+    },
+    {
+      "check_name": "Test file test_model_evaluation.py",
+      "status": "ValidationStatus.PASSED",
+      "message": "Required test file test_model_evaluation.py is present",
+      "details": {
+        "file_size": 4824
+      },
+      "severity": "high"
+    }
+  ],
+  "security_validation": {
+    "iam_policy_checks": [
+      {
+        "check_name": "IAM Policy Analysis: execution_policy",
+        "status": "ValidationStatus.PASSED",
+        "message": "IAM policy execution_policy analyzed for compliance",
+        "details": {
+          "policy_name": "execution_policy",
+          "policy_size": 3012,
+          "analysis_type": "basic_structure"
+        },
+        "severity": "medium"
+      },
+      {
+        "check_name": "IAM Policy Analysis: trust_policy",
+        "status": "ValidationStatus.PASSED",
+        "message": "IAM policy trust_policy analyzed for compliance",
+        "details": {
+          "policy_name": "trust_policy",
+          "policy_size": 212,
+          "analysis_type": "basic_structure"
+        },
+        "severity": "medium"
+      },
+      {
+        "check_name": "IAM Policy Analysis: model_registry_policy",
+        "status": "ValidationStatus.PASSED",
+        "message": "IAM policy model_registry_policy analyzed for compliance",
+        "details": {
+          "policy_name": "model_registry_policy",
+          "policy_size": 1015,
+          "analysis_type": "basic_structure"
+        },
+        "severity": "medium"
+      },
+      {
+        "check_name": "IAM Policy Analysis: endpoint_policy",
+        "status": "ValidationStatus.PASSED",
+        "message": "IAM policy endpoint_policy analyzed for compliance",
+        "details": {
+          "policy_name": "endpoint_policy",
+          "policy_size": 1544,
+          "analysis_type": "basic_structure"
+        },
+        "severity": "medium"
+      }
+    ],
+    "encryption_checks": [
+      {
+        "check_name": "Encryption Configuration: main.yaml",
+        "status": "ValidationStatus.PASSED",
+        "message": "Encryption configuration found in main.yaml",
+        "details": {
+          "template_name": "main.yaml",
+          "encryption_keywords_found": true
+        },
+        "severity": "high"
+      }
+    ],
+    "network_security_checks": [
+      {
+        "check_name": "Network Security Configuration",
+        "status": "ValidationStatus.SKIPPED",
+        "message": "Network security validation not yet implemented",
+        "details": {
+          "placeholder": true,
+          "component": "network_security"
+        },
+        "severity": "low"
+      }
+    ],
+    "access_control_checks": [
+      {
+        "check_name": "Access Control Configuration",
+        "status": "ValidationStatus.SKIPPED",
+        "message": "Access control validation not yet implemented",
+        "details": {
+          "placeholder": true,
+          "component": "access_control"
+        },
+        "severity": "low"
+      }
+    ],
+    "overall_security_score": 71.42857142857143
+  },
+  "cost_analysis": null,
+  "performance_benchmarks": null,
+  "production_readiness": {
+    "overall_score": 0.0,
+    "security_score": 80.0,
+    "reliability_score": 85.0,
+    "performance_score": 75.0,
+    "maintainability_score": 90.0,
+    "readiness_level": "partially_ready"
+  },
+  "validation_timestamp": "2026-01-13T09:14:50.358199"
+}

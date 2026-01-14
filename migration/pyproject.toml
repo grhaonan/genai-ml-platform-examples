@@ -1,0 +1,191 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "sagemigrator"
+version = "0.1.0"
+description = "Intelligent EC2 to SageMaker Migration System"
+readme = "README.md"
+requires-python = ">=3.8"
+license = {text = "MIT"}
+authors = [
+    {name = "SageMigrator Team", email = "team@sagemigrator.dev"},
+]
+keywords = ["sagemaker", "aws", "migration", "machine-learning", "mlops"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: System :: Systems Administration",
+]
+dependencies = [
+    "click>=8.0.0",
+    "pyyaml>=6.0",
+    "boto3>=1.26.0",
+    "botocore>=1.29.0",
+    "pandas>=1.5.0",
+    "numpy>=1.21.0",
+    "ast-tools>=0.1.0",
+    "pathspec>=0.10.0",
+    "jinja2>=3.1.0",
+    "python-dotenv>=0.19.0",
+    "structlog>=22.0.0",
+]
+
+[project.optional-dependencies]
+# Core development tools
+dev = [
+    "pytest>=7.0.0",
+    "pytest-cov>=4.0.0",
+    "hypothesis>=6.0.0",
+    "black>=22.0.0",
+    "flake8>=5.0.0",
+    "mypy>=1.0.0",
+    "pre-commit>=2.20.0",
+]
+
+# Documentation tools
+docs = [
+    "sphinx>=5.0.0",
+    "sphinx-rtd-theme>=1.0.0",
+    "myst-parser>=0.18.0",
+]
+
+# Production deployment
+prod = [
+    "gunicorn>=20.0.0",
+    "uvicorn>=0.18.0",
+]
+
+# Minimal installation (core only)
+minimal = []
+
+# Full installation (everything)
+all = [
+    "pytest>=7.0.0",
+    "pytest-cov>=4.0.0",
+    "hypothesis>=6.0.0",
+    "black>=22.0.0",
+    "flake8>=5.0.0",
+    "mypy>=1.0.0",
+    "pre-commit>=2.20.0",
+    "sphinx>=5.0.0",
+    "sphinx-rtd-theme>=1.0.0",
+    "myst-parser>=0.18.0",
+    "gunicorn>=20.0.0",
+    "uvicorn>=0.18.0",
+]
+
+[project.scripts]
+sagemigrator = "sagemigrator.cli:cli"
+
+[project.urls]
+Homepage = "https://github.com/sagemigrator/sagemigrator"
+Documentation = "https://sagemigrator.readthedocs.io"
+Repository = "https://github.com/sagemigrator/sagemigrator.git"
+"Bug Tracker" = "https://github.com/sagemigrator/sagemigrator/issues"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["sagemigrator*"]
+exclude = ["tests*"]
+
+[tool.setuptools.package-data]
+sagemigrator = [
+    "templates/*.py",
+    "templates/*.yaml",
+    "templates/*.json",
+    "config/*.yaml",
+]
+
+# Black configuration
+[tool.black]
+line-length = 100
+target-version = ['py38', 'py39', 'py310', 'py311']
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+  # directories
+  \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | build
+  | dist
+)/
+'''
+
+# Pytest configuration
+[tool.pytest.ini_options]
+minversion = "7.0"
+addopts = "-ra -q --strict-markers --strict-config"
+testpaths = ["tests"]
+python_files = ["test_*.py", "*_test.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "integration: marks tests as integration tests",
+    "unit: marks tests as unit tests",
+    "property: marks tests as property-based tests",
+]
+
+# Coverage configuration
+[tool.coverage.run]
+source = ["sagemigrator"]
+omit = [
+    "*/tests/*",
+    "*/test_*",
+    "setup.py",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "if self.debug:",
+    "if settings.DEBUG",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if 0:",
+    "if __name__ == .__main__.:",
+    "class .*\\bProtocol\\):",
+    "@(abc\\.)?abstractmethod",
+]
+
+# MyPy configuration
+[tool.mypy]
+python_version = "3.8"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+disallow_untyped_decorators = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+warn_unreachable = true
+strict_equality = true
+
+[[tool.mypy.overrides]]
+module = [
+    "boto3.*",
+    "botocore.*",
+    "hypothesis.*",
+    "pandas.*",
+    "numpy.*",
+]
+ignore_missing_imports = true

@@ -1,0 +1,2 @@
+[console_scripts]
+sagemigrator = sagemigrator.cli:cli

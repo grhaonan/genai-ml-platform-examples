@@ -1,0 +1,71 @@
+{
+  "source_analysis": {
+    "source_info": {
+      "path": "ec2-mnist",
+      "total_files": 3,
+      "python_files": 1,
+      "notebook_files": 0,
+      "config_files": 1,
+      "total_lines": 141,
+      "estimated_complexity": "simple"
+    },
+    "dependencies": {
+      "total_dependencies": 2,
+      "compatible_packages": [
+        "torch"
+      ],
+      "problematic_packages": [
+        "torchvision"
+      ],
+      "missing_packages": [],
+      "version_conflicts": {},
+      "sagemaker_alternatives": {
+        "torchvision": "manual_download"
+      }
+    },
+    "patterns": {
+      "training_patterns": [],
+      "data_loading_patterns": [
+        "dataloader",
+        "torchvision_datasets"
+      ],
+      "model_patterns": [
+        "custom_model",
+        "model_saving"
+      ],
+      "distributed_training": false,
+      "custom_metrics": false,
+      "visualization_usage": false
+    },
+    "risks": {
+      "overall_risk": "RiskLevel.LOW",
+      "high_risk_items": [
+        "Problematic dependency: torchvision",
+        "Torchvision datasets usage"
+      ],
+      "medium_risk_items": [],
+      "low_risk_items": [],
+      "estimated_effort_hours": 11,
+      "complexity_score": 0.22000000000000003
+    },
+    "recommendations": [
+      {
+        "category": "dependencies",
+        "priority": "high",
+        "description": "Package torchvision is not compatible with SageMaker",
+        "action_required": "Replace with manual_download",
+        "estimated_effort": "4-8 hours"
+      },
+      {
+        "category": "data_loading",
+        "priority": "high",
+        "description": "Code uses torchvision datasets",
+        "action_required": "Implement manual data download",
+        "estimated_effort": "4-8 hours"
+      }
+    ],
+    "analysis_timestamp": "2026-01-13T09:14:48.217349"
+  },
+  "generation_timestamp": "2026-01-13T09:14:50.338280",
+  "sagemigrator_version": "0.1.0"
+}
