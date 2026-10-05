@@ -8,10 +8,12 @@ import requests
 from langfuse.decorators import langfuse_context, observe
 from langfuse.model import PromptClient
 
+from config import AWS_REGION
+
 # used to invoke the Bedrock Converse API
 bedrock_runtime = boto3.client(
     service_name="bedrock-runtime",
-    region_name="us-west-2"
+    region_name=AWS_REGION
 )
 
 # In case the input message is not in the Bedrock Converse API format,
